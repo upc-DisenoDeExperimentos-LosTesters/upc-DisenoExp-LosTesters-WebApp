@@ -1,6 +1,4 @@
 <script>
-import {IamApiService} from "../services/iam-api.service.js";
-
 export default {
   name: "iam-login",
   data() {
@@ -9,31 +7,36 @@ export default {
       password: "",
       error: false,
       error_msg: "",
-      iamApi:new IamApiService()
-    }
+      hardcodedUsers: [
+        { id: 1, email: "businessman@gmail.com", password: "123456", type: "businessman" },
+        { id: 2, email: "driver@gmail.com", password: "123456", type: "driver" }
+      ]
+    };
   },
   created() {
     document.body.style.backgroundColor = '#303841';
-
   },
-  methods:{
-    login(){
-
-      this.iamApi.findUserWithEmailAndPassword(this.email,this.password).then(data=>{
-        const info = data.data[0];
-        if (info === undefined){
-          this.error = true; this.error_msg = "Email or Password incorrect"
-        }else{
-          info.type === "businessman" ? this.$router.push(`/${info.id}/home-businessman-menu`) : this.$router.push(`/${info.id}/home-driver-menu`) ;
-        }
-      })
+  methods: {
+    login() {
+      const user = this.hardcodedUsers.find(
+          u => u.email === this.email && u.password === this.password
+      );
+      if (!user) {
+        this.error = true;
+        this.error_msg = "Email or Password incorrect";
+      } else {
+        user.type === "businessman"
+            ? this.$router.push(`/${user.id}/home-businessman-menu`)
+            : this.$router.push(`/${user.id}/home-driver-menu`);
+      }
     },
     cleanCss() {
       document.body.style.backgroundColor = '';
     }
   }
-}
+};
 </script>
+
 
 <template>
   <div class="wrapper fadeInDown">
