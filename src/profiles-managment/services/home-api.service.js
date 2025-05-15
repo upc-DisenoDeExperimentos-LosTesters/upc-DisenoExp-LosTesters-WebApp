@@ -1,23 +1,16 @@
 import http from "../../shared/services/http-common.js";
 
-
-
 export class HomeApiService {
+    getRecentShipments() {
+        return http.get("/shipments");
+    }
 
-    getAllActivities() {
-        return http.get('/moviGestion-cya/reports')
+    getVehicles() {
+        return http.get("/vehicles");
+    }
 
+    getReports() {
+        return http.get("/reports");
     }
-    getAllCondition() {
-        return http.get('/moviGestion-cya/vehicle');
-    }
-    getAllDeliveries() {
-        return http.get('/moviGestion-cya/shipment');
-    }
-    getAllActivitiesDriver() {
-        return http.get('/moviGestion-cya/reports');
-    }
-    getAllDeliveriesDriver() {
-        return http.get('/moviGestion-cya/shipment');
-    }
+
 }

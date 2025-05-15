@@ -1,16 +1,29 @@
 import http from "../../shared/services/http-common.js";
 
-export class IamApiService{
-    createUser(jsonUser){
-        return http.post('/moviGestion-iam/users',jsonUser)
+export class IamApiService {
+
+    // Crear usuario
+    createUser(jsonUser) {
+        return http.post('/profile', jsonUser);
     }
-    findUserById(id){
-        return http.get(`/moviGestion-iam/users?id=${id}`);
+
+    // Login de usuario (retorna el JWT)
+    login(credentials) {
+        return http.post('/profile/login', credentials); // { email, password }
     }
-    findUserWithEmailAndPassword(email,password){
-        return http.get(`/moviGestion-iam/users?email=${email}&password=${password}`)
+
+    // Obtener todos los usuarios (requiere token)
+    getAllProfiles() {
+        return http.get('/profile');
     }
-    findUserWithEmail(email){
-        return http.get(`/moviGestion-iam/users?email=${email}`)
+
+    // Obtener un perfil por ID (requiere token)
+    getProfileById(id) {
+        return http.get(`/profile/${id}`);
+    }
+
+    // Obtener perfil por email (requiere token)
+    getProfileByEmail(email) {
+        return http.get(`/profile/email/${email}`);
     }
 }

@@ -1,4 +1,7 @@
 <script>
+import { IamApiService } from "../services/iam-api.service.js";
+import {jwtDecode} from "jwt-decode"; // asegúrate de instalarlo: npm i jwt-decode
+
 export default {
   name: "iam-login",
   data() {
@@ -6,28 +9,37 @@ export default {
       email: "",
       password: "",
       error: false,
-      error_msg: "",
-      hardcodedUsers: [
-        { id: 1, email: "businessman@gmail.com", password: "123456", type: "businessman" },
-        { id: 2, email: "driver@gmail.com", password: "123456", type: "driver" }
-      ]
+      error_msg: ""
     };
   },
   created() {
     document.body.style.backgroundColor = '#303841';
   },
   methods: {
-    login() {
-      const user = this.hardcodedUsers.find(
-          u => u.email === this.email && u.password === this.password
-      );
-      if (!user) {
+    async login() {
+      try {
+        const response = await new IamApiService().login({
+          email: this.email,
+          password: this.password
+        });
+
+        const token = response.data.token;
+        localStorage.setItem("token", token);
+
+        const decoded = jwtDecode(token);
+        const userId = decoded.sub;
+        const userType = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        if (userType === "GERENTE") {
+          this.$router.push(`/${userId}/home-businessman-menu`);
+        } else if (userType === "TRANSPORTISTA") {
+          this.$router.push(`/${userId}/home-driver-menu`);
+        } else {
+          throw new Error("Tipo de usuario no reconocido.");
+        }
+      } catch (error) {
         this.error = true;
-        this.error_msg = "Email or Password incorrect";
-      } else {
-        user.type === "businessman"
-            ? this.$router.push(`/${user.id}/home-businessman-menu`)
-            : this.$router.push(`/${user.id}/home-driver-menu`);
+        this.error_msg = "Credenciales incorrectas o error en el servidor.";
       }
     },
     cleanCss() {
@@ -38,34 +50,38 @@ export default {
 </script>
 
 
+
 <template>
   <div class="wrapper fadeInDown">
     <div id="formContent">
-      <!-- Tabs Titles -->
       <div class="fadeIn first">
         <img src="../../public/assets/logo.png" id="icon" alt="User Icon" />
       </div>
       <h1>Login</h1>
-      <!-- Login Form -->
-      <form v-on:submit.prevent="login">
-        <p class="text-left">Email</p>
-        <input type="text" id="login" class="fadeIn second" name="login" v-model="email">
-        <p class="text-left">Password</p>
-        <input type="password" id="password" class="fadeIn third" name="password" v-model="password">
-        <p class="text-right">Forgot password?</p>
-        <input type="submit" class="fadeIn fourth" value="Log In">
+
+      <form @submit.prevent="login">
+        <p class="text-left white">Email</p>
+        <input type="text" id="login" class="fadeIn second" name="login" v-model="email" />
+        <p class="text-left white">Password</p>
+        <input type="password" id="password" class="fadeIn third" name="password" v-model="password" />
+        <p class="text-right"><span class="white">Forgot password?</span></p>
+        <input type="submit" class="fadeIn fourth" value="Log In" />
       </form>
 
-      <!-- Go to Register -->
-      <div class="alert alert-danger"  v-if="error">
-        {{error_msg}}
+      <div class="alert alert-danger" v-if="error">
+        {{ error_msg }}
       </div>
       <div>
-        <p> <i class="pi pi-minus"/> Don´t have a account? <router-link to="/register"  @click.native="cleanCss"> Sign up</router-link> <i class="pi pi-minus"/> </p>
+        <p class="white">
+          <i class="pi pi-minus" /> Don’t have an account?
+          <router-link to="/register" @click.native="cleanCss"> Sign up</router-link>
+          <i class="pi pi-minus" />
+        </p>
       </div>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
@@ -130,6 +146,10 @@ input[type=text]:focus, input[type=password]:focus {
   background-color: #92badd;
   border-bottom: 2px solid #F39C12;
   font-family: 'Open Sans', sans-serif;
+}
+
+.white {
+  color: white;
 }
 
 /* Botones */

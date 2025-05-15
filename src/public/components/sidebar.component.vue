@@ -18,11 +18,12 @@ export default {
   created() {
     window.addEventListener("resize", this.handleResize);
     this.handleResize();
-    this.api.findUserById(this.id).then(data=>{
-      this.type = data.data[0].type;
-      this.name = data.data[0].name;
-      this.lastName = data.data[0].lastName
-    })
+    this.api.getProfileById(this.id).then(response => {
+      this.type = response.data.type;
+      this.name = response.data.name;
+      this.lastName = response.data.lastName;
+    });
+
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
@@ -35,7 +36,7 @@ export default {
       this.hamburgerVisible = !this.hamburgerVisible;
     },
     goToHome(){
-      if(this.type === "businessman"){
+      if(this.type === "GERENTE"){
         this.$router.push(`/${this.id}/home-businessman-menu`)
       }else{
         this.$router.push(`/${this.id}/home-driver-menu`)
@@ -45,26 +46,33 @@ export default {
       this.$router.push(`/${this.id}/userprofile`)
     },
     goToVehicles(){
-      if(this.type === "businessman"){
+      if(this.type === "GERENTE"){
         this.$router.push(`/${this.id}/vehicles-businessman`)
       }else{
         this.$router.push(`/${this.id}/vehicles-carrier`)
       }
     },
     goToReports(){
-      if(this.type === "businessman"){
+      if(this.type === "GERENTE"){
         this.$router.push(`/${this.id}/report/businessman`)
       }else{
         this.$router.push(`/${this.id}/report/carrier`)
       }
     },
     goToOrganizations(){
-      if(this.type === "businessman"){
+      if(this.type === "GERENTE"){
         this.$router.push(`/${this.id}/organization`)
       }else{
         this.$router.push(`/${this.id}/organization/view`)
       }
+    },
+    logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userType');
+      this.$router.push('/login');
     }
+
   }
 }
 </script>
@@ -118,6 +126,13 @@ export default {
                 <span class="font-medium text-xl">Settings</span>
               </a>
             </li>
+            <li @click="logout">
+              <a v-ripple class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
+                <i class="pi pi-sign-out mr-2 text-xl"></i>
+                <span class="font-medium text-xl">Logout</span>
+              </a>
+            </li>
+
           </ul>
         </div>
       </div>
