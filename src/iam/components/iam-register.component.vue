@@ -4,7 +4,6 @@ export default {
   data() {
     return {
       type: "",
-
     }
   },
   created() {
@@ -16,10 +15,9 @@ export default {
     },
     typeSelection(type){
       this.type = type;
-      console.log(this.type)
     },
     goToRegisterUserInformation(){
-      this.$router.push(`register/${this.type}`)
+      this.$router.push(`/register/${this.type}`)
     }
   }
 }
@@ -35,8 +33,8 @@ export default {
       <h1>Register as</h1>
       <!-- Botones -->
       <div class="buttons">
-        <button class="btn" @click="typeSelection('businessman');goToRegisterUserInformation()"> &nbsp <i class="pi pi-user"/> &nbsp Businessman </button>
-        <button class="btn" @click="typeSelection('carrier');goToRegisterUserInformation()"> &nbsp <i class="pi pi-user"/> &nbsp Carrier </button>
+        <button class="btn" @click="typeSelection('GERENTE');goToRegisterUserInformation()"> &nbsp <i class="pi pi-user"/> &nbsp Businessman </button>
+        <button class="btn" @click="typeSelection('TRANSPORTISTA');goToRegisterUserInformation()"> &nbsp <i class="pi pi-user"/> &nbsp Carrier </button>
       </div>
       <!-- Go to Log in-->
       <div>

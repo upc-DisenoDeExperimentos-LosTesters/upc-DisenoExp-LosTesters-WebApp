@@ -1,91 +1,98 @@
 <script>
-import {IamApiService} from "../services/iam-api.service.js";
+import { IamApiService } from "../services/iam-api.service.js";
 
 export default {
   name: "iam-register-user-info",
-  data(){
-    return{
-      type: this.$route.params.type,
-      name:"",
-      lastName:"",
+  data() {
+    return {
+      type: this.$route.params.type === "GERENTE" || this.$route.params.type === "TRANSPORTISTA"
+        ? this.$route.params.type
+        : "",
+      name: "",
+      lastName: "",
       email: "",
       password: "",
+      passwordConfirmation: "",
       privacityPolicy: false,
-      passwordConfirmation:"",
       error: false,
       error_msg: "",
-      vehicules:[],
-      iamApi:new IamApiService()
-    }
+      showTerms: false,
+      iamApi: new IamApiService()
+    };
   },
   created() {
     document.body.style.backgroundColor = '#303841';
-
   },
   methods: {
     async createdUser() {
-      this.error = false; // Reset error flag before validation
-
-      // Run validation checks
+      this.error = false;
       await this.errors();
-
-      // If there are no errors, proceed to create user
       if (!this.error) {
         let json = {
           name: this.name,
           lastName: this.lastName,
           email: this.email,
           password: this.password,
-          type: this.type,
-          vehicules:this.vehicules
+          type: this.type
         };
-
-        // Create user
-        this.iamApi.createUser(json).then((data) => {
-          console.log(data);
-          this.$router.push('/register/successfully')
+        this.iamApi.createUser(json).then(() => {
+          this.$router.push('/register/successfully');
         });
       }
     },
     async errors() {
-      // Check if email is already registered
-      await this.iamApi.findUserWithEmail(this.email).then((data) => {
-        const info = data.data;
-        if (info[0] !== undefined) {
-          this.error = true;
-          this.error_msg = "Email already registered";
-        }
-      });
-
-      // Check if privacy policy is accepted
+      // Validación básica
+      if (!this.name || !this.lastName || !this.email || !this.password || !this.passwordConfirmation) {
+        this.error = true;
+        this.error_msg = "Todos los campos son obligatorios";
+        return;
+      }
+      if (!["GERENTE", "TRANSPORTISTA"].includes(this.type)) {
+        this.error = true;
+        this.error_msg = "Tipo de usuario inválido";
+        return;
+      }
       if (!this.privacityPolicy) {
         this.error = true;
-        this.error_msg = "Accept privacy policy please";
+        this.error_msg = "Debe aceptar los términos y servicios";
+        return;
       }
-
-      // Check if passwords match
       if (this.password !== this.passwordConfirmation) {
         this.error = true;
-        this.error_msg = "Passwords do not match";
+        this.error_msg = "Las contraseñas no coinciden";
+        return;
+      }
+      // Validar email único
+      try {
+        const data = await this.iamApi.getProfileByEmail(this.email);
+        if (data.data && data.data.id) {
+          this.error = true;
+          this.error_msg = "El email ya está registrado";
+        }
+      } catch (e) {
+        // Si no existe, está bien
       }
     },
     cleanCss() {
       document.body.style.backgroundColor = "";
+    },
+    openTerms() {
+      this.showTerms = true;
+    },
+    closeTerms() {
+      this.showTerms = false;
     }
   }
-
 }
 </script>
 
 <template>
   <div class="wrapper fadeInDown">
     <div id="formContent">
-      <!-- Tabs Titles -->
       <div class="fadeIn first">
         <img src="../../public/assets/logo.png" id="icon" alt="User Icon" />
       </div>
       <h1>Sign Up</h1>
-      <!-- Login Form -->
       <form v-on:submit.prevent="createdUser">
         <div class="input-group">
           <div class="input-half">
@@ -109,22 +116,44 @@ export default {
             <input type="password" id="passwordConfirmation" class="fadeIn third" name="passwordConfirmation" v-model="passwordConfirmation">
           </div>
         </div>
-
         <div class="checkbox-group">
           <input type="checkbox" id="Checkbox" name="Checkbox" value="privacityPolicy" v-model="privacityPolicy">
-          <label for="Checkbox">I have read and agree to the Privacy Policy</label>
+          <label for="Checkbox">
+            He leído y acepto los
+            <button type="button" class="terms-btn" @click="openTerms">Términos y Servicios</button>
+          </label>
         </div>
-
-        <input type="submit" class="fadeIn fourth" value="Sign Up">
+        <input
+            type="submit"
+            class="fadeIn fourth"
+            value="Sign Up"
+            :disabled="!privacityPolicy"
+            :class="{ disabled: !privacityPolicy }"
+            v-if="!error || error_msg !== 'Debe aceptar los términos y servicios'"
+        >
       </form>
-
-      <!-- Go to Register -->
-      <div class="alert alert-danger"  v-if="error">
+      <div class="alert alert-danger" v-if="error">
         {{error_msg}}
       </div>
       <div>
-        <p> <i class="pi pi-minus"/> Already have a account? <router-link to="/login"  @click.native="cleanCss"> Log in</router-link> <i class="pi pi-minus"/> </p>
+        <p> <i class="pi pi-minus"/> ¿Ya tienes una cuenta? <router-link to="/login"  @click.native="cleanCss"> Inicia sesión</router-link> <i class="pi pi-minus"/> </p>
       </div>
+    </div>
+  </div>
+  <div v-if="showTerms" class="terms-modal">
+    <div class="terms-content">
+      <h2>Términos y Servicios</h2>
+      <ul>
+        <li>El usuario es responsable de la veracidad de la información proporcionada.</li>
+        <li>Los datos personales serán tratados conforme a la ley de protección de datos.</li>
+        <li>No se permite el uso indebido de la plataforma para fines ilícitos.</li>
+        <li>La empresa no se responsabiliza por pérdidas causadas por información incorrecta.</li>
+        <li>El acceso puede ser revocado en caso de incumplimiento de las normas.</li>
+        <li>El usuario acepta recibir notificaciones relacionadas con el servicio.</li>
+        <li>La empresa se reserva el derecho de modificar los términos y condiciones.</li>
+        <li>El uso de la plataforma implica la aceptación de estos términos.</li>
+      </ul>
+      <button class="close-btn" @click="closeTerms">Cerrar</button>
     </div>
   </div>
 </template>
@@ -311,4 +340,55 @@ input[type=checkbox]:checked + label:after {
   width: 60%;
 }
 
+/* Términos y condiciones */
+.terms-btn {
+  background: none;
+  border: none;
+  color: #F39C12;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 0;
+  margin: 0 2px;
+}
+.terms-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.terms-content {
+  background: #fff;
+  color: #222;
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+  max-width: 400px;
+  width: 90vw;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+  text-align: left;
+}
+.terms-content h2 {
+  margin-top: 0;
+  color: #F39C12;
+}
+.terms-content ul {
+  margin: 1rem 0 1.5rem 1.2rem;
+  padding: 0;
+  font-size: 1rem;
+}
+.close-btn {
+  background: #F39C12;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.close-btn:hover {
+  background: #303841;
+}
 </style>
