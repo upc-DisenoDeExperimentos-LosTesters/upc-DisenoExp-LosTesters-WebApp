@@ -1,7 +1,6 @@
 <script>
 import {IamApiService} from "../../iam/services/iam-api.service.js";
 
-
 export default {
   name: "sidebar",
   data() {
@@ -9,8 +8,8 @@ export default {
       name:'',
       lastName:'',
       type:'',
-      visible: false,
-      hamburgerVisible: window.innerWidth <= 860,
+      isMobile: window.innerWidth <= 860,
+      sidebarOpen: window.innerWidth > 860,
       id: this.$route.params.id,
       api: new IamApiService()
     };
@@ -23,17 +22,21 @@ export default {
       this.name = response.data.name;
       this.lastName = response.data.lastName;
     });
-
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
   },
   methods:{
     handleResize() {
-      this.hamburgerVisible = window.innerWidth <= 860;
+      this.isMobile = window.innerWidth <= 860;
+      if (this.isMobile) {
+        this.sidebarOpen = false;
+      } else {
+        this.sidebarOpen = true;
+      }
     },
-    toggleHamburger(){
-      this.hamburgerVisible = !this.hamburgerVisible;
+    toggleSidebar(){
+      this.sidebarOpen = !this.sidebarOpen;
     },
     goToHome(){
       if(this.type === "GERENTE"){
@@ -72,18 +75,34 @@ export default {
       localStorage.removeItem('userType');
       this.$router.push('/login');
     }
-
   }
 }
 </script>
 
 <template>
-    <pv-sidebar class="p-col-12 p-md-6 p-xl-4" :visible="!hamburgerVisible" :showCloseIcon="false" :showHeader="false" :dismissable="true">
-      <pv-button icon="pi pi-times" text rounded aria-label="Cancel" class="close-button" @click="toggleHamburger">
-      </pv-button>
+  <div>
+    <pv-sidebar
+      class="custom-sidebar p-col-12 p-md-6 p-xl-4"
+      :visible="sidebarOpen"
+      :showCloseIcon="false"
+      :showHeader="false"
+      :dismissable="isMobile"
+      :modal="isMobile"
+      position="left"
+      :blockScroll="false"
+    >
+      <pv-button
+        icon="pi pi-times"
+        text
+        rounded
+        aria-label="Cancel"
+        class="close-button"
+        v-if="isMobile"
+        @click="toggleSidebar"
+      />
       <div class="flex flex-column align-items-left h-full justify-content-around z-">
         <div @click="goToProfile" class="flex justify-content-center align-items-center mr-6 flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
-          <img src="https://www.capitalcoahuila.com.mx/wp-content/uploads/2022/11/CARL-e1669117013260.jpeg" id="icon" alt="User Icon" class="custom-image"size=" xlarge" shape="circle">
+          <img src="https://www.capitalcoahuila.com.mx/wp-content/uploads/2022/11/CARL-e1669117013260.jpeg" id="icon" alt="User Icon" class="custom-image" size="xlarge" shape="circle">
           <a class="m-2">
             <h2>{{name}}</h2>
             <h2>{{lastName}}</h2>
@@ -132,78 +151,111 @@ export default {
                 <span class="font-medium text-xl">Logout</span>
               </a>
             </li>
-
           </ul>
         </div>
       </div>
     </pv-sidebar>
-  <pv-button class="p-col-12 p-md-auto justify-content-center p-3 m-3 hamburger-button" @click="toggleHamburger">
-    <i class="pi pi-bars"></i>
-  </pv-button>
+    <!-- Botón hamburguesa: visible en mobile cuando sidebar está oculta, y en desktop cuando sidebar está oculta -->
+    <pv-button
+      class="show-sidebar-btn"
+      v-if="!sidebarOpen"
+      @click="toggleSidebar"
+      aria-label="Mostrar menú"
+      icon="pi pi-bars"
+      text
+    />
+    <!-- Botón para ocultar sidebar en desktop -->
+    <pv-button
+      class="hide-sidebar-desktop"
+      v-if="!isMobile && sidebarOpen"
+      @click="toggleSidebar"
+      icon="pi pi-angle-left"
+      text
+      aria-label="Ocultar menú"
+    />
+  </div>
 </template>
 
 <style>
-.p-sidebar-header{
-  display:none;
-}
-
-.p-sidebar{
+.p-sidebar {
   background-color: #303841;
   border-top-right-radius: 50px;
   border-bottom-right-radius: 50px;
   z-index: 1000;
-}
-
-.p-sidebar-mask{
-  z-index: 1000 !important;
-}
-
-.close-button{
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-top: 1rem;
-  margin-right: 1rem;
-  z-index: 1002;
-}
-
-body{
-  background-color: #5D6D7E;
-}
-
-.custom-image {
-  border-radius: 50%;
-}
-
-.mr-6
-{
-  margin-right: 2px;
-}
-
-.custom-image {
-  border-radius: 50%;
-  margin-left: 0 !important;
-}
-
-.hamburger-button {
-  position: fixed;
-  top: 0;
+  position: fixed !important;
   left: 0;
-  z-index: 1000;
+  top: 0;
+  height: 100vh;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+
+.p-sidebar-mask {
+  z-index: 1000 !important;
+  background: rgba(0,0,0,0.5);
 }
 
 @media (min-width: 860px) {
-  .hamburger-button {
-    display: none;
+  .p-sidebar {
+    z-index: 100;
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   }
-
-  .close-button{
-    display: none;
-  }
-
-  .p-sidebar-mask{
+  .p-sidebar-mask {
+    background: transparent !important;
+    pointer-events: none;
     z-index: 0 !important;
+  }
+  .close-button {
+    display: none !important;
+  }
+  .hide-sidebar-desktop {
+    display: block;
+    position: fixed;
+    top: 1rem;
+    left: 220px;
+    z-index: 101;
+    background: #F39C12;
+    color: #fff;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .show-sidebar-btn {
+    display: block !important;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 102;
+    background: #F39C12;
+    color: #fff;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 }
 
+@media (max-width: 860px) {
+  .hide-sidebar-desktop {
+    display: none !important;
+  }
+  .show-sidebar-btn {
+    display: block !important;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 102;
+    background: #F39C12;
+    color: #fff;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+}
 </style>
+

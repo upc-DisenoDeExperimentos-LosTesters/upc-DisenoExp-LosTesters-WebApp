@@ -1,6 +1,7 @@
 <script>
 import { HomeApiService } from "../services/home-api.service.js";
 import { IamApiService } from "../../iam/services/iam-api.service.js";
+import { useRouter } from "vue-router";
 
 export default {
   name: "home-businessman",
@@ -9,74 +10,136 @@ export default {
       name: '',
       lastName: '',
       type: '',
+      id: this.$route.params.id,
       shipments: [],
       vehicles: [],
       reports: [],
       transporters: [],
-      id: this.$route.params.id,
+      userMap: {},
       api: new IamApiService(),
       homeApi: new HomeApiService()
     };
   },
   async created() {
-    // Obtener datos del usuario
-    this.api.getProfileById(this.id).then(response => {
-      this.name = response.data.name;
-      this.lastName = response.data.lastName;
-      this.type = response.data.type;
-    });
+    const userRes = await this.api.getProfileById(this.id);
+    this.name = userRes.data.name;
+    this.lastName = userRes.data.lastName;
+    this.type = userRes.data.type;
 
-    // Llamar a los métodos del servicio correcto
-    const [shipmentsRes, vehiclesRes, reportsRes] = await Promise.all([
+    const [shipmentsRes, vehiclesRes, reportsRes, usersRes] = await Promise.all([
       this.homeApi.getRecentShipments(),
       this.homeApi.getVehicles(),
       this.homeApi.getReports(),
+      this.api.getAllProfiles()
     ]);
 
     this.shipments = shipmentsRes.data.slice(0, 5);
     this.vehicles = vehiclesRes.data.slice(0, 5);
     this.reports = reportsRes.data.slice(0, 5);
+    this.transporters = usersRes.data;
+
+    // Mapeamos los transportistas para obtener nombres por id
+    this.userMap = Object.fromEntries(this.transporters.map(u => [u.id, `${u.name} ${u.lastName}`]));
+  },
+  methods: {
+    getUserName(id) {
+      return this.userMap[id] || "Desconocido";
+    },
+    formatDate(date) {
+      return new Date(date).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+    },
+    goToReport(id) {
+      this.$router.push(`/report/${id}`);
+    },
+    goToShipment(id) {
+      this.$router.push(`/shipment/${id}`);
+    },
+    goToVehicle(id) {
+      this.$router.push(`/vehicle/${id}`);
+    }
   }
 };
 </script>
 
 <template>
-  <div class="p-grid p-dir-col z-1 container justify-content-center align-content-center container-home-businessman">
-    <div class="p-col image-title-container">
-      <h1>Welcome, {{ name }} {{lastName}}!</h1>
-      <img src="../../public/assets/logo.png" id="icon" alt="User Icon" class="img-home">
+  <div class="container-home-businessman">
+    <div class="image-title-container mb-4">
+      <h1>¡Bienvenido, {{ name }} {{ lastName }}!</h1>
+      <img src="../../public/assets/logo.png" class="img-home" />
     </div>
-    <div class="p-grid p-dir-col p-col card-container-business justify-content-center">
-      <pv-card v-if="shipments.length" class="p-card">
+
+    <div class="card-grid">
+      <div class="card-column" v-if="shipments.length">
+        <pv-card class="businessman-card">
+          <template #title>
+            <i class="pi pi-truck"></i> Últimos Envíos
+          </template>
+          <template #content>
+            <div
+              class="horizontal-grid"
+              :class="{ 'scrollable-x': shipments.length > 6 }"
+            >
+              <div
+                v-for="s in shipments"
+                :key="s.id"
+                class="entry-card grid-entry-card"
+              >
+                <div class="entry-content">
+                  <p><strong>{{ s.destiny }}</strong> — {{ s.status }}</p>
+                  <p class="muted">{{ formatDate(s.createdAt) }}</p>
+                </div>
+                <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">Ver Detalle</pv-button>
+              </div>
+            </div>
+          </template>
+        </pv-card>
+      </div>
+
+      <div class="card-column" v-if="vehicles.length">
+        <pv-card class="businessman-card">
+          <template #title>
+            <i class="pi pi-car"></i> Vehículos Registrados
+          </template>
+          <template #content>
+            <div
+              class="horizontal-grid"
+              :class="{ 'scrollable-x': vehicles.length > 6 }"
+            >
+              <div
+                v-for="v in vehicles"
+                :key="v.id"
+                class="entry-card grid-entry-card"
+              >
+                <div class="entry-content">
+                  <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
+                </div>
+                <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">Ver Detalle</pv-button>
+              </div>
+            </div>
+          </template>
+        </pv-card>
+      </div>
+    </div>
+
+    <div class="reports-section" v-if="reports.length">
+      <pv-card class="businessman-card reports-card">
         <template #title>
-          <i class="pi pi-truck p-mr-2"></i> Últimos Envíos
+          <i class="pi pi-file"></i> Reportes Recientes
         </template>
         <template #content>
-          <div v-for="s in shipments" :key="s.id" class="shipment-item">
-            <p><strong>{{ s.destiny }}</strong> - <span class="status">{{ s.status }}</span></p>
-          </div>
-        </template>
-      </pv-card>
-
-
-      <pv-card v-if="vehicles.length" class="p-card">
-        <template #title>
-          <i class="pi pi-car p-mr-2"></i> Vehículos Registrados
-        </template>
-        <template #content>
-          <div v-for="v in vehicles" :key="v.id" class="vehicle-item">
-            <p><strong>{{ v.model }}</strong> - <span class="license">{{ v.licensePlate }}</span></p>
-          </div>
-        </template>
-      </pv-card>
-
-      <pv-card v-if="reports.length" class="p-card">
-        <template #title>
-          <i class="pi pi-file p-mr-2"></i> Reportes Recientes
-        </template>
-        <template #content>
-          <div v-for="r in reports" :key="r.id" class="report-item">
-            <p><strong>{{ r.type }}</strong> - <span class="date">{{ new Date(r.createdAt).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) }}</span></p>
+          <div class="reports-carousel">
+            <div
+              v-for="r in reports"
+              :key="r.id"
+              class="entry-card report-entry-card"
+            >
+              <div class="entry-content">
+                <p><strong>{{ r.type }}</strong></p>
+                <p>{{ r.description }}</p>
+                <p class="muted">{{ formatDate(r.createdAt) }} — <em>{{ getUserName(r.userId) }}</em></p>
+              </div>
+              <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">Ver Detalle</pv-button>
+            </div>
           </div>
         </template>
       </pv-card>
@@ -84,104 +147,224 @@ export default {
   </div>
 </template>
 
-<style>
+<style scoped>
+.container-home-businessman {
+  position: fixed;
+  top: 0;
+  left: 320px;
+  width: calc(100vw - 240px);
+  height: 100vh;
+  overflow-y: auto;
+  padding: 2rem;
+  background: #181c23;
+  transition: left 0.3s, width 0.3s;
+}
+
 .image-title-container {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
-  justify-content: center;
-}
-
-.card-container-business {
-  display: flex;
-  gap: 1rem;
   flex-wrap: wrap;
-}
-
-.p-card {
-  width: 100%;
-  max-width: 400px;
-  border: 1px solid #dcdcdc;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.p-card-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.p-card-content {
-  font-size: 1rem;
-  color: #555;
-}
-
-.shipment-item, .vehicle-item, .report-item {
-  margin-bottom: 0.5rem;
-}
-
-.status {
-  color: #007ad9;
-  font-weight: bold;
-}
-
-.license {
-  color: #28a745;
-  font-weight: bold;
-}
-
-.date {
-  color: #6c757d;
-  font-style: italic;
 }
 
 .img-home {
   width: 70px;
   height: 70px;
+  border-radius: 50%;
 }
 
-h1 {
-  color: antiquewhite;
-  font-size: 2rem;
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 2rem;
 }
 
-@media (max-width: 1024px) {
-  .card-container-business {
-    flex-direction: column !important;
+.card-column {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  min-width: 320px;
+}
+
+.businessman-card {
+  width: 100%;
+  max-width: 380px;
+  background: #232a34 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.10);
+  color: #f3f3f3 !important;
+  border: none !important;
+  margin: 0 auto;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #232a34;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: box-shadow 0.2s, background 0.2s;
+  color: #f3f3f3;
+  border: 1px solid #232a34;
+}
+
+.entry-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  background: #252d38;
+}
+
+.entry-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-btn {
+  margin-left: 1rem;
+  white-space: nowrap;
+  background: #F39C12 !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.detail-btn:hover {
+  background: #d35400 !important;
+}
+
+.muted {
+  color: #b0b6be;
+  font-size: 0.875rem;
+}
+
+.reports-section {
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.reports-card {
+  max-width: 100%;
+  width: 90vw;
+  background: #232a34 !important;
+}
+
+.reports-carousel {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #F39C12 #232a34;
+}
+
+.report-entry-card {
+  min-width: 260px;
+  max-width: 320px;
+  flex: 0 0 auto;
+  background: #232a34;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  color: #f3f3f3;
+  border: 1px solid #232a34;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.report-entry-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  background: #252d38;
+}
+
+/* Scrollbar estilizado para la sección de reportes */
+.reports-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+.reports-carousel::-webkit-scrollbar-thumb {
+  background: #F39C12;
+  border-radius: 4px;
+}
+.reports-carousel::-webkit-scrollbar-track {
+  background: #232a34;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .card-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  .card-column {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .reports-card {
+    width: 100vw;
+    max-width: 100vw;
   }
 }
 
 @media (max-width: 860px) {
-  .container {
-    margin-left: 1rem;
-    display: flex;
-    align-content: center;
-  }
-
   .container-home-businessman {
-    margin-left: 1rem !important;
+    left: 0 !important;
+    width: 100vw !important;
+    padding-left: 0 !important;
   }
-
-  .image-title-container {
-    margin-top: 4rem;
-  }
-
-  .img-home {
-    width: 50px;
-    height: 50px;
-  }
-
-  h1 {
-    font-size: 1.5rem;
+  .reports-card {
+    width: 100vw;
+    max-width: 100vw;
   }
 }
 
 @media (max-width: 600px) {
   .container-home-businessman {
-    margin-right: 1.5rem;
+    padding: 0.5rem;
+  }
+  .image-title-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .card-column {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  .businessman-card {
+    max-width: 100%;
+  }
+  .entry-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .detail-btn {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  .reports-card {
+    width: 100vw;
+    max-width: 100vw;
+  }
+  .report-entry-card {
+    min-width: 220px;
+    max-width: 90vw;
   }
 }
-
 </style>
