@@ -1,5 +1,5 @@
 <script>
-import {ReportsApiService} from "./services/reports-api.service.js";
+import {HomeApiService} from "../../profiles-managment/services/home-api.service.js";
 
 export default {
   name: "report-driver",
@@ -8,7 +8,7 @@ export default {
     return {
       reports: null,
       report: null,
-      reportsApi: new ReportsApiService(),
+      reportsApi: new HomeApiService(),
       submitted: false,
       reportDialog: false,
     };
@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     async getDataReport() {
-      const response = await this.reportsApi.getAllReports();
+      const response = await this.reportsApi.getReports();
       const reports = response.data;
       for (let report of reports) {
         const userResponse = await this.reportsApi.findUserByID(report['id-user']);

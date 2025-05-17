@@ -5,12 +5,12 @@ export default {
   name: "sidebar",
   data() {
     return {
-      name:'',
-      lastName:'',
-      type:'',
+      name: '',
+      lastName: '',
+      type: localStorage.getItem('userType') || '',
       isMobile: window.innerWidth <= 860,
       sidebarOpen: window.innerWidth > 860,
-      id: this.$route.params.id,
+      id: localStorage.getItem('userId') || '',
       api: new IamApiService()
     };
   },
@@ -21,52 +21,50 @@ export default {
       this.type = response.data.type;
       this.name = response.data.name;
       this.lastName = response.data.lastName;
+      // Opcional: actualiza localStorage si cambia el tipo
+      localStorage.setItem('userType', this.type);
     });
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
   },
-  methods:{
+  methods: {
     handleResize() {
       this.isMobile = window.innerWidth <= 860;
-      if (this.isMobile) {
-        this.sidebarOpen = false;
-      } else {
-        this.sidebarOpen = true;
-      }
+      this.sidebarOpen = !this.isMobile;
     },
-    toggleSidebar(){
+    toggleSidebar() {
       this.sidebarOpen = !this.sidebarOpen;
     },
-    goToHome(){
-      if(this.type === "GERENTE"){
-        this.$router.push(`/${this.id}/home-businessman-menu`)
-      }else{
-        this.$router.push(`/${this.id}/home-driver-menu`)
+    goToHome() {
+      if (this.type === "GERENTE") {
+        this.$router.push(`/${this.id}/home-businessman-menu`);
+      } else {
+        this.$router.push(`/${this.id}/home-driver-menu`);
       }
     },
-    goToProfile(){
-      this.$router.push(`/${this.id}/userprofile`)
+    goToProfile() {
+      this.$router.push(`/${this.id}/userprofile`);
     },
-    goToVehicles(){
-      if(this.type === "GERENTE"){
-        this.$router.push(`/${this.id}/vehicles-businessman`)
-      }else{
-        this.$router.push(`/${this.id}/vehicles-carrier`)
+    goToVehicles() {
+      if (this.type === "GERENTE") {
+        this.$router.push(`/vehicles-businessman`);
+      } else {
+        this.$router.push(`/${this.id}/vehicles-carrier`);
       }
     },
-    goToReports(){
-      if(this.type === "GERENTE"){
-        this.$router.push(`/${this.id}/report/businessman`)
-      }else{
-        this.$router.push(`/${this.id}/report/carrier`)
+    goToReports() {
+      if (this.type === "GERENTE") {
+        this.$router.push(`/${this.id}/report/businessman`);
+      } else {
+        this.$router.push(`/${this.id}/report/carrier`);
       }
     },
-    goToOrganizations(){
-      if(this.type === "GERENTE"){
-        this.$router.push(`/${this.id}/organization`)
-      }else{
-        this.$router.push(`/${this.id}/organization/view`)
+    goToOrganizations() {
+      if (this.type === "GERENTE") {
+        this.$router.push(`/${this.id}/organization`);
+      } else {
+        this.$router.push(`/${this.id}/organization/view`);
       }
     },
     logout() {

@@ -13,4 +13,11 @@ export class HomeApiService {
         return http.get("/reports");
     }
 
+    getShipmentById(id) {
+        return http.get(`/shipments/${id}`);
+    }
+
+    getVehicleById(id) {
+        return http.get(`/vehicles/${id}`);
+    }
 }

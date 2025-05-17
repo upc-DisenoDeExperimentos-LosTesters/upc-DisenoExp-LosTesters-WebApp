@@ -12,6 +12,9 @@ import BusinessmanReportComponent from "../public/pages/businessman-report.compo
 import CarrierReportComponent from "../public/pages/carrier-report.component.vue";
 import OrganizationShipmentComponent from "../public/pages/organization-shipment.component.vue";
 import ViewShipmentsComponent from "../public/pages/view-shipments.component.vue";
+import ShipmentDetailComponent from "../profiles-managment/components/shipment-detail.component.vue";
+import VehicleListComponent from "../profiles-managment/components/vehicle-list.component.vue";
+import VehicleDetailComponent from "../profiles-managment/components/vehicle-detail.component.vue"
 
 const router  = createRouter({
     history: createWebHistory('/'),
@@ -31,8 +34,9 @@ const router  = createRouter({
         {path: '/:id/report/carrier', component: CarrierReportComponent},
         {path: '/:id/organization', component: OrganizationShipmentComponent},
         {path: '/:id/organization/view', component: ViewShipmentsComponent},
-
-
+        { path: '/shipment/:id', component: ShipmentDetailComponent },
+        {path:'/vehicles-businessman', component: VehicleListComponent },
+        { path: '/vehicle/:id', component: VehicleDetailComponent },
     ]
 });
 export default router;

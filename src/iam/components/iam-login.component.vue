@@ -30,6 +30,10 @@ export default {
         const userId = decoded.sub;
         const userType = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
+        // Guarda id y type en localStorage
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userType", userType);
+
         if (userType === "GERENTE") {
           this.$router.push(`/${userId}/home-businessman-menu`);
         } else if (userType === "TRANSPORTISTA") {
