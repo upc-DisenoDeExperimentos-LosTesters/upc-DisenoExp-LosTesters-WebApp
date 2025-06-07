@@ -15,6 +15,7 @@ import ViewShipmentsComponent from "../public/pages/view-shipments.component.vue
 import ShipmentDetailComponent from "../profiles-managment/components/shipment-detail.component.vue";
 import VehicleListComponent from "../profiles-managment/components/vehicle-list.component.vue";
 import VehicleDetailComponent from "../profiles-managment/components/vehicle-detail.component.vue"
+import ReportDetailComponent from "../profiles-managment/components/report-detail.component.vue";
 
 const router  = createRouter({
     history: createWebHistory('/'),
@@ -32,11 +33,12 @@ const router  = createRouter({
         {path:'/:id/vehicles-businessman', component: DisplayVehiclesBusinessmanComponent },
         {path: '/:id/report/businessman', component: BusinessmanReportComponent},
         {path: '/:id/report/carrier', component: CarrierReportComponent},
-        {path: '/:id/organization', component: OrganizationShipmentComponent},
+        {path: '/:id/organization', component: ShipmentDetailComponent},
         {path: '/:id/organization/view', component: ViewShipmentsComponent},
         { path: '/shipment/:id', component: ShipmentDetailComponent },
         {path:'/vehicles-businessman', component: VehicleListComponent },
         { path: '/vehicle/:id', component: VehicleDetailComponent },
+        { path: '/report/:id', component: ReportDetailComponent },
     ]
 });
 export default router;

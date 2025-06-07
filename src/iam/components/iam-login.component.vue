@@ -17,6 +17,18 @@ export default {
   },
   methods: {
     async login() {
+      // Verifica que grecaptcha esté disponible
+      if (typeof grecaptcha === "undefined") {
+        this.error = true;
+        this.error_msg = "El captcha aún no está listo. Espera unos segundos y vuelve a intentar.";
+        return;
+      }
+      const captcha = grecaptcha.getResponse();
+      if (!captcha) {
+        this.error = true;
+        this.error_msg = "Por favor, completa el captcha.";
+        return;
+      }
       try {
         const response = await new IamApiService().login({
           email: this.email,
@@ -68,10 +80,13 @@ export default {
         <input type="text" id="login" class="fadeIn second" name="login" v-model="email" />
         <p class="text-left white">Password</p>
         <input type="password" id="password" class="fadeIn third" name="password" v-model="password" />
+
         <p class="text-right"><span class="white">Forgot password?</span></p>
+
         <input type="submit" class="fadeIn fourth" value="Log In" />
       </form>
-
+      <!-- El captcha debe estar FUERA del form para que no se destruya al recargar el form -->
+      <div class="g-recaptcha" data-sitekey="6Lfrfz4rAAAAAMmfsE1K8Rqrr9OL_E0M-GLlA6g_"></div>
       <div class="alert alert-danger" v-if="error">
         {{ error_msg }}
       </div>
