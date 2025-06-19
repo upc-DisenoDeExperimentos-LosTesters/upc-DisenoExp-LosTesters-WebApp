@@ -22,8 +22,8 @@ export default {
 <template>
   <div class="p-5 flex flex-row flex-auto container z-1 container-data-view">
     <div>
-      <div class="text-100 font-medium text-xl mb-3">Profile</div>
-        <p class="m-0 mb-4 p-0 text-100 line-height-3 mr-3">
+      <div class="font-medium  text-xl mb-3">Profile</div>
+        <p class="m-0 mb-4 p-0 font-medium line-height-3 mr-3">
           Change your profile settings.
         </p>
         <div class="surface-card p-4 shadow-2 border-round">

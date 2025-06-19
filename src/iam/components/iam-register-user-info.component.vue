@@ -1,6 +1,18 @@
 <script>
 import { IamApiService } from "../services/iam-api.service.js";
 
+const forbiddenWords = [
+  "trump", "hitler", "putin", "bin laden", "al qaeda",
+  "isis", "taliban", "nazi", "terrorist", "osama",
+  "dictator", "satan", "lucifer", "devil", "fuck",
+  "shit", "bitch", "asshole", "bastard", "nigger",
+  "slut", "whore", "rape", "killer", "murderer",
+  "pedo", "pedophile", "pakistan", "iran", "iraq",
+  "hamas", "hezbollah", "hitman", "cartel", "mafia",
+  "drugs", "cocaine", "meth", "narco", "gang",
+  "fascist", "racist"
+];
+
 export default {
   name: "iam-register-user-info",
   data() {
@@ -47,16 +59,38 @@ export default {
         this.error_msg = "Todos los campos son obligatorios";
         return;
       }
+      // Validacion de nombre y apellido
+      if (!this.isNameValid(this.name) || !this.isNameValid(this.lastName)) {
+        this.error = true;
+        this.error_msg = "El nombre o apellido contiene palabras no permitidas";
+        return;
+      }
+      // Validación de email
+      if (!this.isEmailValid(this.email)) {
+        this.error = true;
+        this.error_msg = "El correo electrónico no es válido o pertenece a un dominio no permitido";
+        return;
+      }
+
+      // Validación de tipo de usuario
       if (!["GERENTE", "TRANSPORTISTA"].includes(this.type)) {
         this.error = true;
         this.error_msg = "Tipo de usuario inválido";
         return;
       }
+      // Validación de política de privacidad
       if (!this.privacityPolicy) {
         this.error = true;
         this.error_msg = "Debe aceptar los términos y servicios";
         return;
       }
+      // Validación de contraseña
+      if (!this.isPasswordValid(this.password)) {
+        this.error = true;
+        this.error_msg = "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un símbolo";
+        return;
+      }
+      // Validación de confirmación de contraseña
       if (this.password !== this.passwordConfirmation) {
         this.error = true;
         this.error_msg = "Las contraseñas no coinciden";
@@ -81,7 +115,49 @@ export default {
     },
     closeTerms() {
       this.showTerms = false;
+    },
+    isNameValid(name) {
+      const lower = name.trim().toLowerCase();
+
+      // Verifica palabras prohibidas
+      if (forbiddenWords.some(word => lower.includes(word))) {
+        return false;
+      }
+
+      // Verifica que no haya números ni símbolos (solo letras y espacios)
+      const validFormat = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+      return validFormat.test(name);
+    },
+    isEmailValid(email) {
+      // Expresión regular para formato estándar de correo electrónico
+      const validFormat = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+      // Lista de dominios no permitidos (opcional y ampliable)
+      const forbiddenDomains = ["mailinator.com", "tempmail.com", "10minutemail.com", "yopmail.com"];
+
+      if (!validFormat.test(email)) return false;
+
+      const domain = email.split('@')[1].toLowerCase();
+      return !forbiddenDomains.includes(domain);
+    },
+    isPasswordValid(password) {
+      const minLength = 8;
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasLowercase = /[a-z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      return (
+          password.length >= minLength &&
+          hasUppercase &&
+          hasLowercase &&
+          hasNumber &&
+          hasSpecialChar
+      );
     }
+
+
+
   }
 }
 </script>

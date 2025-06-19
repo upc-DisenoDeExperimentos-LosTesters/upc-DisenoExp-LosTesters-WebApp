@@ -41,31 +41,45 @@ export default {
 </script>
 
 <template>
-  <div class="flex align-content-start flex wrap">
-    <div class="ml-3">
+  <div class="cya-vehicles-container">
+    <div class="header">
       <h1>Vehicles</h1>
       <h3>You can see your car fleet</h3>
     </div>
-  </div>
-
-
-  <div class="container" v-for="vehicle of vehicles" v-bind:key="vehicle.id">
-    <pv-card>
-      <template #title>{{vehicle.model}}</template>
-      <template #content>
-        <p class="m-0">
-          License Plate: {{ vehicle.licensePlate }}
-        </p>
-        <p class="m-0">
-          Serial Number: {{ vehicle.serialNumber }}
-        </p>
-      </template>
-    </pv-card>
+    <div class="vehicles-list">
+      <div class="vehicle-card" v-for="vehicle of vehicles" :key="vehicle.id">
+        <pv-card>
+          <template #title>{{ vehicle.model }}</template>
+          <template #content>
+            <p class="m-0">License Plate: {{ vehicle.licensePlate }}</p>
+            <p class="m-0">Serial Number: {{ vehicle.serialNumber }}</p>
+          </template>
+        </pv-card>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.container {
+.cya-vehicles-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.vehicles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.vehicle-card {
   border: 1px solid;
   width: 350px;
   text-align: center;

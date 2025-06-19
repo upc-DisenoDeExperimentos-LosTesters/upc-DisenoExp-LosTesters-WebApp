@@ -4,12 +4,14 @@ import {jwtDecode} from "jwt-decode"; // asegúrate de instalarlo: npm i jwt-dec
 
 export default {
   name: "iam-login",
+
   data() {
     return {
       email: "",
       password: "",
       error: false,
-      error_msg: ""
+      error_msg: "",
+      captchaToken: ""
     };
   },
   created() {
@@ -23,8 +25,7 @@ export default {
         this.error_msg = "El captcha aún no está listo. Espera unos segundos y vuelve a intentar.";
         return;
       }
-      const captcha = grecaptcha.getResponse();
-      if (!captcha) {
+      if (!this.captchaToken) {
         this.error = true;
         this.error_msg = "Por favor, completa el captcha.";
         return;
@@ -61,7 +62,13 @@ export default {
     cleanCss() {
       document.body.style.backgroundColor = '';
     }
-  }
+  },
+  mounted() {
+    window.onCaptchaVerified = (token) => {
+      this.captchaToken = token;
+    };
+  },
+
 };
 </script>
 
@@ -85,8 +92,17 @@ export default {
 
         <input type="submit" class="fadeIn fourth" value="Log In" />
       </form>
-      <!-- El captcha debe estar FUERA del form para que no se destruya al recargar el form -->
-      <div class="g-recaptcha" data-sitekey="6Lfrfz4rAAAAAMmfsE1K8Rqrr9OL_E0M-GLlA6g_"></div>
+
+
+<!--      Nuevo Captcha usando hCaptcha- Falta agregar un link de producion para que funcione-->
+      <div
+          class="h-captcha"
+          data-sitekey="f8548962-dbdc-44e2-83b6-a01cce6a7f46"
+          data-callback="onCaptchaVerified"
+      ></div>
+
+
+
       <div class="alert alert-danger" v-if="error">
         {{ error_msg }}
       </div>
