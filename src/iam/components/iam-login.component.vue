@@ -1,6 +1,6 @@
 <script>
 import { IamApiService } from "../services/iam-api.service.js";
-import {jwtDecode} from "jwt-decode"; // asegúrate de instalarlo: npm i jwt-decode
+import { jwtDecode } from "jwt-decode"; // npm i jwt-decode
 
 export default {
   name: "iam-login",
@@ -19,17 +19,12 @@ export default {
   },
   methods: {
     async login() {
-      // Verifica que grecaptcha esté disponible
-      // if (typeof grecaptcha === "undefined") {
-        //   this.error = true;
-        //   this.error_msg = "El captcha aún no está listo. Espera unos segundos y vuelve a intentar.";
-        //   return;
-        // }
-        // if (!this.captchaToken) {
-        //   this.error = true;
-        //   this.error_msg = "Por favor, completa el captcha.";
-        //   return;
-        // }
+      if (!this.captchaToken) {
+        this.error = true;
+        this.error_msg = "Por favor, completa el captcha.";
+        return;
+      }
+
       try {
         const response = await new IamApiService().login({
           email: this.email,
@@ -43,7 +38,6 @@ export default {
         const userId = decoded.sub;
         const userType = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
-        // Guarda id y type en localStorage
         localStorage.setItem("userId", userId);
         localStorage.setItem("userType", userType);
 
@@ -61,18 +55,28 @@ export default {
     },
     cleanCss() {
       document.body.style.backgroundColor = '';
+    },
+    loadHCaptchaScript() {
+      if (!window.hcaptchaScriptLoaded) {
+        const script = document.createElement("script");
+        script.src = "https://js.hcaptcha.com/1/api.js";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+        window.hcaptchaScriptLoaded = true;
+      }
     }
   },
   mounted() {
+    this.loadHCaptchaScript();
+
+    // Token callback
     window.onCaptchaVerified = (token) => {
       this.captchaToken = token;
     };
-  },
-
+  }
 };
 </script>
-
-
 
 <template>
   <div class="wrapper fadeInDown">
@@ -84,30 +88,26 @@ export default {
 
       <form @submit.prevent="login">
         <p class="text-left white">Email</p>
-        <input type="text" id="login" class="fadeIn second" name="login" v-model="email" />
+        <input type="text" id="login" class="fadeIn second" v-model="email" />
         <p class="text-left white">Password</p>
-        <input type="password" id="password" class="fadeIn third" name="password" v-model="password" />
+        <input type="password" id="password" class="fadeIn third" v-model="password" />
 
         <p class="text-right"><span class="white">Forgot password?</span></p>
 
         <input type="submit" class="fadeIn fourth" value="Log In" />
       </form>
 
-
-<!--      Nuevo Captcha usando hCaptcha- Falta agregar un link de producion para que funcione-->
-<!--
-          <div
-              class="h-captcha"
-              data-sitekey="f8548962-dbdc-44e2-83b6-a01cce6a7f46"
-              data-callback="onCaptchaVerified"
-          ></div>
-          -->
-
-
+      <!-- ✅ CAPTCHA FUNCIONAL -->
+      <div
+          class="h-captcha"
+          data-sitekey="f8548962-dbdc-44e2-83b6-a01cce6a7f46"
+          data-callback="onCaptchaVerified"
+      ></div>
 
       <div class="alert alert-danger" v-if="error">
         {{ error_msg }}
       </div>
+
       <div>
         <p class="white">
           <i class="pi pi-minus" /> Don’t have an account?
@@ -118,6 +118,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 
 <style scoped>

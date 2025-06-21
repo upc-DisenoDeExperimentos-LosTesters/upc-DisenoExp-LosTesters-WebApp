@@ -37,7 +37,27 @@ export default {
         console.error("Error cargando reportes:", error);
       }
     },
+    containsForbiddenWords(text) {
+      const forbiddenWords = [
+        "trump", "hitler", "putin", "bin laden", "al qaeda",
+        "isis", "taliban", "nazi", "terrorist", "osama",
+        "dictator", "satan", "lucifer", "devil", "fuck",
+        "shit", "bitch", "asshole", "bastard", "nigger",
+        "slut", "whore", "rape", "killer", "murderer",
+        "pedo", "pedophile", "pakistan", "iran", "iraq",
+        "hamas", "hezbollah", "hitman", "cartel", "mafia",
+        "drugs", "cocaine", "meth", "narco", "gang",
+        "fascist", "racist"
+      ];
+      const lowerText = text.toLowerCase();
+      return forbiddenWords.some(word => lowerText.includes(word));
+    },
     async submitReport() {
+      if (this.containsForbiddenWords(this.description)) {
+        alert("Tu descripción contiene palabras prohibidas. Por favor edítala.");
+        return;
+      }
+
       try {
         const payload = {
           type: this.type,
@@ -54,6 +74,7 @@ export default {
     formatDate(date) {
       return new Date(date).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" });
     }
+
   }
 };
 </script>
