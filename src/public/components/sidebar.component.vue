@@ -100,7 +100,7 @@ export default {
       />
       <div class="flex flex-column align-items-left h-full justify-content-around z-">
         <div @click="goToProfile" class="flex justify-content-center align-items-center mr-6 flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
-          <img src="https://www.capitalcoahuila.com.mx/wp-content/uploads/2022/11/CARL-e1669117013260.jpeg" id="icon" alt="User Icon" class="custom-image" size="xlarge" shape="circle">
+          <img src="https://www.capitalcoahuila.com.mx/wp-content/uploads/2022/11/CARL-e1669117013260.jpeg" id="icon" alt="User Icon" class="custom-image" width="48" height="48" style="object-fit:cover; border-radius:50%;">
           <a class="m-2">
             <h2>{{name}}</h2>
             <h2>{{lastName}}</h2>
@@ -253,6 +253,12 @@ export default {
     width: 2.5rem;
     height: 2.5rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .custom-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
   }
 }
 </style>

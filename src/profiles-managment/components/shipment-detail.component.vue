@@ -1,20 +1,27 @@
 <script>
 import Sidebar from "../../public/components/sidebar.component.vue";
+import SidebarCarrier from "../../public/components/sidebar-carrier.vue";
 import { HomeApiService } from "../services/home-api.service.js";
 import { IamApiService } from "../../iam/services/iam-api.service.js";
 
 export default {
   name: "shipment-detail",
-  components: { Sidebar },
+  components: { Sidebar, SidebarCarrier },
   data() {
     return {
       shipment: null,
       vehicle: null,
       transporter: null,
       id: this.$route.params.id,
+      userType: (localStorage.getItem("userType") || "").toUpperCase(),
       homeApi: new HomeApiService(),
       iamApi: new IamApiService()
     };
+  },
+  computed: {
+    sidebarComponent() {
+      return this.userType === "TRANSPORTISTA" ? "SidebarCarrier" : "Sidebar";
+    }
   },
   async created() {
     // Obtener el envío
@@ -46,7 +53,8 @@ export default {
 
 <template>
   <div class="container">
-    <sidebar />
+    <component :is="sidebarComponent" />
+
     <div class="detail-content-wrapper">
       <div class="shipment-card" v-if="shipment">
         <h2 class="shipment-title">Detalle del Envío</h2>

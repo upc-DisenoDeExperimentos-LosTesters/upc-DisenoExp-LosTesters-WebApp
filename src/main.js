@@ -1,15 +1,15 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './app.vue'
+import { createApp } from 'vue';
+import './style.css';
+import App from './app.vue';
 
-import 'primevue/resources/themes/md-light-indigo/theme.css'
-import 'primevue/resources/primevue.min.css'
-
-import 'primeicons/primeicons.css'
-import 'primeflex/primeflex.css'
+import 'primevue/resources/themes/md-light-indigo/theme.css';
+import 'primevue/resources/primevue.min.css';
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
 
 import PrimeVue from "primevue/config";
 import Dialog from "primevue/dialog";
+import Dropdown from "primevue/dropdown"; // 👈 AGREGADO AQUÍ
 import router from "./router/index.js";
 import ToastService from "primevue/toastservice";
 import Sidebar from "primevue/sidebar";
@@ -28,7 +28,7 @@ import Message from "primevue/message";
 
 const app = createApp(App);
 
-app.use(PrimeVue,{ripple:true})
+app.use(PrimeVue, { ripple: true })
     .use(ToastService)
     .use(router)
     .component('pv-sidebar', Sidebar)
@@ -36,10 +36,8 @@ app.use(PrimeVue,{ripple:true})
     .component('pv-toolbar', Toolbar)
     .component('pv-card', Card)
     .component('pv-table', DataTable)
-    .component('pv-toolbar', Toolbar)
     .component('pv-avatar', Avatar)
     .component('pv-confirm-dialog', ConfirmDialog)
-    .component('pv-table', DataTable)
     .component('pv-data-view', DataView)
     .component('pv-column', Column)
     .component('pv-button', Button)
@@ -47,4 +45,6 @@ app.use(PrimeVue,{ripple:true})
     .component('pv-file-upload', FileUpload)
     .component('pv-message', Message)
     .component('pv-calendar', Calendar)
-app.mount('#app')
+    .component('pv-dropdown', Dropdown); // 👈 REGISTRADO AQUÍ
+
+app.mount('#app');

@@ -17,6 +17,10 @@ import VehicleListComponent from "../profiles-managment/components/vehicle-list.
 import VehicleDetailComponent from "../profiles-managment/components/vehicle-detail.component.vue"
 import ReportDetailComponent from "../profiles-managment/components/report-detail.component.vue";
 import ShipmentList from "../profiles-managment/components/shipment-list.vue";
+import CarrierHomeView from "../public/pages/CarrierHomeView.vue";
+import ReportsCarrier from "../profiles-managment/components/ReportsCarrier.vue";
+import VehiclesCarrierView from "../profiles-managment/components/VehiclesCarrierView.vue";
+import shipmentTransportistaView from "../profiles-managment/components/shipment-transportista-view.vue";
 
 const router  = createRouter({
     history: createWebHistory('/'),
@@ -28,18 +32,19 @@ const router  = createRouter({
         {path:'/register/:type', component: registerInformationComponent},
         {path:'/register/successfully', component:registerInformationSuccessfullyComponent},
         {path:'/:id/home-businessman-menu',    component: homeProfileBusinessmanComponent},
-        {path:'/:id/home-driver-menu',    component:  homeProfileDriverComponent},
+        {path:'/:id/home-driver-menu',    component:  CarrierHomeView},
         {path:'/:id/userprofile', component: userProfileComponent},
-        {path:'/:id/vehicles-carrier', component: DisplayVehiclesCarrierComponent },
+        {path:'/:id/vehicles-carrier', component: VehiclesCarrierView },
         {path:'/:id/vehicles-businessman', component: DisplayVehiclesBusinessmanComponent },
         {path: '/:id/report/businessman', component: BusinessmanReportComponent},
-        {path: '/:id/report/carrier', component: CarrierReportComponent},
+        {path: '/:id/report/carrier', component: ReportsCarrier},
         {path: '/:id/organization', component: ShipmentList},
         {path: '/:id/organization/view', component: ViewShipmentsComponent},
         { path: '/shipment/:id', component: ShipmentDetailComponent },
         {path:'/vehicles-businessman', component: VehicleListComponent },
         { path: '/vehicle/:id', component: VehicleDetailComponent },
         { path: '/report/:id', component: ReportDetailComponent },
+        {path: '/:id/shipments-carrier', component: shipmentTransportistaView },
     ]
 });
 export default router;

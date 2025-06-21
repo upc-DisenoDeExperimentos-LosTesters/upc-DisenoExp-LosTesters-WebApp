@@ -20,4 +20,7 @@ export class HomeApiService {
     getVehicleById(id) {
         return http.get(`/vehicles/${id}`);
     }
+    createReport(payload) {
+        return http.post("/reports", payload);
+    }
 }

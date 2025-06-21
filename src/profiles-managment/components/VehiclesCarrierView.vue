@@ -2,31 +2,27 @@
 import Sidebar from "../../public/components/sidebar.component.vue";
 import { HomeApiService } from "../services/home-api.service.js";
 import http from "../../shared/services/http-common.js";
+import SidebarCarrier from "../../public/components/sidebar-carrier.vue";
 
 function containsForbiddenWords(text) {
-  const forbiddenWords = [
-    "trump", "hitler", "putin", "bin laden", "al qaeda",
-    "isis", "taliban", "nazi", "terrorist", "osama",
-    "dictator", "satan", "lucifer", "devil", "fuck",
-    "shit", "bitch", "asshole", "bastard", "nigger",
-    "slut", "whore", "rape", "killer", "murderer",
-    "pedo", "pedophile", "pakistan", "iran", "iraq",
-    "hamas", "hezbollah", "hitman", "cartel", "mafia",
-    "drugs", "cocaine", "meth", "narco", "gang",
-    "fascist", "racist"
-  ];
+  const forbiddenWords = ["trump", "hitler", "putin", "bin laden", "al qaeda",
+    "isis", "taliban", "nazi", "terrorist", "osama", "dictator", "satan",
+    "lucifer", "devil", "fuck", "shit", "bitch", "asshole", "bastard",
+    "nigger", "slut", "whore", "rape", "killer", "murderer", "pedo",
+    "pedophile", "pakistan", "iran", "iraq", "hamas", "hezbollah",
+    "hitman", "cartel", "mafia", "drugs", "cocaine", "meth", "narco",
+    "gang", "fascist", "racist"];
 
   const lowerText = text.toLowerCase();
   return forbiddenWords.some(word => lowerText.includes(word));
 }
 
 export default {
-  name: "vehicle-list",
-  components: { Sidebar },
+  name: "vehicles-carrier-view",
+  components: {SidebarCarrier, Sidebar },
   data() {
     return {
       vehicles: [],
-      transportistas: [],
       loading: true,
       showModal: false,
       isEditing: false,
@@ -40,25 +36,16 @@ export default {
       },
       error: "",
       homeApi: new HomeApiService(),
-      userId: Number(localStorage.getItem("userId")),
-      userType: (localStorage.getItem("userType") || "").toUpperCase()
+      userId: Number(localStorage.getItem("userId"))
     };
   },
   computed: {
     filteredVehicles() {
-      if (this.userType === "GERENTE") {
-        return this.vehicles.filter(v => v.idPropietario === this.userId);
-      } else if (this.userType === "TRANSPORTISTA") {
-        return this.vehicles.filter(v => v.idTransportista === this.userId);
-      }
-      return [];
+      return this.vehicles.filter(v => v.idTransportista === this.userId);
     }
   },
   async created() {
     await this.fetchVehicles();
-    if (this.userType === "GERENTE") {
-      await this.fetchTransportistas();
-    }
   },
   methods: {
     async fetchVehicles() {
@@ -70,31 +57,19 @@ export default {
         this.loading = false;
       }
     },
-    async fetchTransportistas() {
-      try {
-        const res = await http.get("/profile/transportistas");
-        this.transportistas = res.data;
-      } catch {
-        this.error = "No se pudo cargar la lista de transportistas.";
-      }
-    },
     goToVehicleDetail(id) {
       this.$router.push(`/vehicle/${id}`);
     },
     openModal(vehicle = null) {
       this.isEditing = !!vehicle;
-
       this.form = {
-        id: vehicle?.id || null,  // ✅ ahora el ID siempre está definido
+        id: vehicle?.id || null,
         licensePlate: vehicle?.licensePlate || "",
         model: vehicle?.model || "",
         serialNumber: vehicle?.serialNumber || "",
         idPropietario: this.userId,
-        idTransportista: this.userType === "TRANSPORTISTA"
-            ? this.userId
-            : vehicle?.idTransportista || ""
+        idTransportista: this.userId
       };
-
       this.error = "";
       this.showModal = true;
     },
@@ -103,12 +78,12 @@ export default {
     },
     async submitVehicle() {
       this.error = "";
-      const { licensePlate, model, serialNumber, idPropietario, idTransportista } = this.form;
-      if (!licensePlate || !model || !serialNumber || !idPropietario || !idTransportista) {
+      const { licensePlate, model, serialNumber } = this.form;
+      if (!licensePlate || !model || !serialNumber) {
         this.error = "Completa todos los campos.";
         return;
       }
-      if (containsForbiddenWords(this.form.licensePlate) || containsForbiddenWords(this.form.model)) {
+      if (containsForbiddenWords(licensePlate) || containsForbiddenWords(model)) {
         this.error = "El vehículo contiene palabras no permitidas.";
         return;
       }
@@ -138,14 +113,13 @@ export default {
 };
 </script>
 
-
 <template>
   <div class="container">
-    <sidebar />
+    <sidebar-carrier />
     <div class="vehicle-list-container">
       <div class="header-row">
-        <h2 class="title">Vehículos Registrados</h2>
-        <pv-button class="add-btn" icon="pi pi-plus" label="Agregar Vehículo" @click="openModal" />
+        <h2 class="title">Mis Vehículos</h2>
+
       </div>
       <div v-if="loading" class="loading">Cargando...</div>
       <div v-else-if="filteredVehicles.length === 0" class="no-vehicles">No hay vehículos registrados.</div>
@@ -158,53 +132,12 @@ export default {
           </div>
           <div class="vehicle-actions">
             <pv-button class="detail-btn" text size="small" @click="goToVehicleDetail(v.id)">Ver Detalle</pv-button>
-            <pv-button class="edit-btn" text size="small" @click="openModal(v)">Editar</pv-button>
-            <pv-button class="delete-btn" text size="small" @click="deleteVehicle(v.id)">Eliminar</pv-button>
-          </div>
 
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal para agregar vehículo -->
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal-card">
-        <h3>Registrar Vehículo</h3>
-        <form @submit.prevent="submitVehicle">
-          <label>Modelo
-            <input v-model="form.model" type="text" required />
-          </label>
-          <label>Placa
-            <input v-model="form.licensePlate" type="text" required />
-          </label>
-          <label>N° de serie
-            <input v-model="form.serialNumber" type="text" required />
-          </label>
-<label>ID Propietario
-<input v-model="form.idPropietario" type="number" required :readonly="true" :value="form.idPropietario" />
-          </label>
-          <label>ID Transportista
-            <template v-if="userType === 'GERENTE'">
-              <select v-model="form.idTransportista" required>
-                <option disabled value="">Selecciona un transportista</option>
-                <option v-for="t in transportistas" :key="t.id" :value="t.id">
-                  {{ t.name }} {{ t.lastName }}
-                </option>
-              </select>
-            </template>
-
-            <template v-else>
-              <input v-model="form.idTransportista" type="number" required readonly />
-            </template>
-          </label>
-          <div class="modal-actions">
-            <button type="button" @click="closeModal">Cancelar</button>
-            <button type="submit">Registrar</button>
-          </div>
-          <div v-if="error" class="error">{{ error }}</div>
-        </form>
-      </div>
-    </div>
   </div>
 </template>
 
