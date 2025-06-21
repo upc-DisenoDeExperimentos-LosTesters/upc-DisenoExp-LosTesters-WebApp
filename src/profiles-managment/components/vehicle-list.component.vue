@@ -3,15 +3,35 @@ import Sidebar from "../../public/components/sidebar.component.vue";
 import { HomeApiService } from "../services/home-api.service.js";
 import http from "../../shared/services/http-common.js";
 
+function containsForbiddenWords(text) {
+  const forbiddenWords = [
+    "trump", "hitler", "putin", "bin laden", "al qaeda",
+    "isis", "taliban", "nazi", "terrorist", "osama",
+    "dictator", "satan", "lucifer", "devil", "fuck",
+    "shit", "bitch", "asshole", "bastard", "nigger",
+    "slut", "whore", "rape", "killer", "murderer",
+    "pedo", "pedophile", "pakistan", "iran", "iraq",
+    "hamas", "hezbollah", "hitman", "cartel", "mafia",
+    "drugs", "cocaine", "meth", "narco", "gang",
+    "fascist", "racist"
+  ];
+
+  const lowerText = text.toLowerCase();
+  return forbiddenWords.some(word => lowerText.includes(word));
+}
+
 export default {
   name: "vehicle-list",
   components: { Sidebar },
   data() {
     return {
       vehicles: [],
+      transportistas: [],
       loading: true,
       showModal: false,
+      isEditing: false,
       form: {
+        id: null,
         licensePlate: "",
         model: "",
         serialNumber: "",
@@ -20,13 +40,12 @@ export default {
       },
       error: "",
       homeApi: new HomeApiService(),
-      userId: Number(localStorage.getItem('id')),
-      userType: (localStorage.getItem('userType') || '').toUpperCase()
+      userId: Number(localStorage.getItem("userId")),
+      userType: (localStorage.getItem("userType") || "").toUpperCase()
     };
   },
   computed: {
     filteredVehicles() {
-      // Mostrar todos los vehículos para GERENTE, solo los del transportista para TRANSPORTISTA
       if (this.userType === "GERENTE") {
         return this.vehicles;
       } else if (this.userType === "TRANSPORTISTA") {
@@ -37,30 +56,45 @@ export default {
   },
   async created() {
     await this.fetchVehicles();
+    if (this.userType === "GERENTE") {
+      await this.fetchTransportistas();
+    }
   },
   methods: {
     async fetchVehicles() {
       this.loading = true;
       try {
-        // Asegúrate de que el endpoint sea correcto y que getVehicles() devuelva la lista
         const res = await this.homeApi.getVehicles();
         this.vehicles = Array.isArray(res.data) ? res.data : [];
       } finally {
         this.loading = false;
       }
     },
+    async fetchTransportistas() {
+      try {
+        const res = await http.get("/profile/transportistas");
+        this.transportistas = res.data;
+      } catch {
+        this.error = "No se pudo cargar la lista de transportistas.";
+      }
+    },
     goToVehicleDetail(id) {
-      // Usa la ruta absoluta para evitar conflictos con rutas anidadas
       this.$router.push(`/vehicle/${id}`);
     },
-    openModal() {
+    openModal(vehicle = null) {
+      this.isEditing = !!vehicle;
+
       this.form = {
-        licensePlate: "",
-        model: "",
-        serialNumber: "",
+        id: vehicle?.id || null,  // ✅ ahora el ID siempre está definido
+        licensePlate: vehicle?.licensePlate || "",
+        model: vehicle?.model || "",
+        serialNumber: vehicle?.serialNumber || "",
         idPropietario: this.userId,
-        idTransportista: this.userType === "TRANSPORTISTA" ? this.userId : ""
+        idTransportista: this.userType === "TRANSPORTISTA"
+            ? this.userId
+            : vehicle?.idTransportista || ""
       };
+
       this.error = "";
       this.showModal = true;
     },
@@ -69,21 +103,41 @@ export default {
     },
     async submitVehicle() {
       this.error = "";
-      if (!this.form.licensePlate || !this.form.model || !this.form.serialNumber || !this.form.idPropietario || !this.form.idTransportista) {
+      const { licensePlate, model, serialNumber, idPropietario, idTransportista } = this.form;
+      if (!licensePlate || !model || !serialNumber || !idPropietario || !idTransportista) {
         this.error = "Completa todos los campos.";
         return;
       }
+      if (containsForbiddenWords(this.form.licensePlate) || containsForbiddenWords(this.form.model)) {
+        this.error = "El vehículo contiene palabras no permitidas.";
+        return;
+      }
       try {
-        await http.post("/vehicle", this.form);
+        if (this.isEditing && this.form.id !== null) {
+          await http.put(`/vehicles/${this.form.id}`, this.form);
+        } else {
+          await http.post("/vehicles", this.form);
+        }
         this.showModal = false;
         await this.fetchVehicles();
       } catch (e) {
-        this.error = "Error al registrar el vehículo.";
+        this.error = "Error al guardar el vehículo.";
+      }
+    },
+    async deleteVehicle(id) {
+      if (confirm("¿Estás seguro de que deseas eliminar este vehículo?")) {
+        try {
+          await http.delete(`/vehicles/${id}`);
+          await this.fetchVehicles();
+        } catch {
+          alert("Error al eliminar el vehículo.");
+        }
       }
     }
   }
 };
 </script>
+
 
 <template>
   <div class="container">
@@ -102,7 +156,12 @@ export default {
             <p><strong>Placa:</strong> {{ v.licensePlate }}</p>
             <p><strong>N° de serie:</strong> {{ v.serialNumber }}</p>
           </div>
-          <pv-button class="detail-btn" text size="small" @click="goToVehicleDetail(v.id)">Ver Detalle</pv-button>
+          <div class="vehicle-actions">
+            <pv-button class="detail-btn" text size="small" @click="goToVehicleDetail(v.id)">Ver Detalle</pv-button>
+            <pv-button class="edit-btn" text size="small" @click="openModal(v)">Editar</pv-button>
+            <pv-button class="delete-btn" text size="small" @click="deleteVehicle(v.id)">Eliminar</pv-button>
+          </div>
+
         </div>
       </div>
     </div>
@@ -121,11 +180,22 @@ export default {
           <label>N° de serie
             <input v-model="form.serialNumber" type="text" required />
           </label>
-          <label>ID Propietario
-            <input v-model="form.idPropietario" type="number" required :readonly="userType==='GERENTE' ? false : true" />
+<label>ID Propietario
+<input v-model="form.idPropietario" type="number" required :readonly="true" :value="form.idPropietario" />
           </label>
           <label>ID Transportista
-            <input v-model="form.idTransportista" type="number" required :readonly="userType==='TRANSPORTISTA'" />
+            <template v-if="userType === 'GERENTE'">
+              <select v-model="form.idTransportista" required>
+                <option disabled value="">Selecciona un transportista</option>
+                <option v-for="t in transportistas" :key="t.id" :value="t.id">
+                  {{ t.name }} {{ t.lastName }}
+                </option>
+              </select>
+            </template>
+
+            <template v-else>
+              <input v-model="form.idTransportista" type="number" required readonly />
+            </template>
           </label>
           <div class="modal-actions">
             <button type="button" @click="closeModal">Cancelar</button>
@@ -303,4 +373,28 @@ export default {
     padding: 1rem 0.5rem;
   }
 }
+.vehicle-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.edit-btn {
+  background: #3498db !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  font-weight: 500;
+}
+.edit-btn:hover {
+  background: #2980b9 !important;
+}
+.delete-btn {
+  background: #e74c3c !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  font-weight: 500;
+}
+.delete-btn:hover {
+  background: #c0392b !important;
+}
+
 </style>

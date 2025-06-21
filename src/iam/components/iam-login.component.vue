@@ -20,16 +20,16 @@ export default {
   methods: {
     async login() {
       // Verifica que grecaptcha esté disponible
-      if (typeof grecaptcha === "undefined") {
-        this.error = true;
-        this.error_msg = "El captcha aún no está listo. Espera unos segundos y vuelve a intentar.";
-        return;
-      }
-      if (!this.captchaToken) {
-        this.error = true;
-        this.error_msg = "Por favor, completa el captcha.";
-        return;
-      }
+      // if (typeof grecaptcha === "undefined") {
+        //   this.error = true;
+        //   this.error_msg = "El captcha aún no está listo. Espera unos segundos y vuelve a intentar.";
+        //   return;
+        // }
+        // if (!this.captchaToken) {
+        //   this.error = true;
+        //   this.error_msg = "Por favor, completa el captcha.";
+        //   return;
+        // }
       try {
         const response = await new IamApiService().login({
           email: this.email,
@@ -95,11 +95,13 @@ export default {
 
 
 <!--      Nuevo Captcha usando hCaptcha- Falta agregar un link de producion para que funcione-->
-      <div
-          class="h-captcha"
-          data-sitekey="f8548962-dbdc-44e2-83b6-a01cce6a7f46"
-          data-callback="onCaptchaVerified"
-      ></div>
+<!--
+          <div
+              class="h-captcha"
+              data-sitekey="f8548962-dbdc-44e2-83b6-a01cce6a7f46"
+              data-callback="onCaptchaVerified"
+          ></div>
+          -->
 
 
 
