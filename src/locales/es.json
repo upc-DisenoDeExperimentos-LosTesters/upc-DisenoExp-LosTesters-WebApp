@@ -1,0 +1,26 @@
+{
+  "home": {
+    "welcome": "¡Bienvenido",
+    "recentShipments": "Últimos Envíos Asignados",
+    "assignedVehicles": "Vehículos Asignados",
+    "recentReports": "Tus Reportes Recientes",
+    "viewDetail": "Ver Detalle"
+  },
+  "profile": {
+    "title": "Perfil",
+    "subtitle": "Cambia la configuración de tu perfil.",
+    "nickname": "Apodo",
+    "bio": "Biografía",
+    "avatar": "Avatar",
+    "email": "Correo",
+    "saveChanges": "Guardar cambios"
+  },
+  "sidebar": {
+    "home": "Inicio",
+    "organization": "Organización",
+    "reports": "Reportes",
+    "vehicles": "Vehículos",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  }
+}

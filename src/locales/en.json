@@ -1,0 +1,27 @@
+{
+  "home": {
+    "welcome": "Welcome",
+    "recentShipments": "Latest Assigned Shipments",
+    "assignedVehicles": "Assigned Vehicles",
+    "recentReports": "Your Recent Reports",
+    "viewDetail": "View Detail"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Change your profile settings.",
+    "nickname": "Nickname",
+    "bio": "Bio",
+    "avatar": "Avatar",
+    "email": "Email",
+    "saveChanges": "Save Changes"
+  },
+  "sidebar": {
+    "home": "Home",
+    "organization": "Organization",
+    "reports": "Reports",
+    "vehicles": "Vehicles",
+    "settings": "Settings",
+    "logout": "Logout"
+  }
+
+}

@@ -67,10 +67,17 @@ export default {
 };
 </script>
 
+<script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+</script>
+
+
 <template>
   <div class="container-home-businessman">
     <div class="image-title-container mb-4">
-      <h1>¡Bienvenido, {{ name }} {{ lastName }}!</h1>
+      <h1>{{ t('home.welcome') }}, {{ name }} {{ lastName }}!</h1>
       <img src="../../public/assets/logo.png" class="img-home" />
     </div>
 
@@ -78,7 +85,7 @@ export default {
       <div class="card-column" v-if="shipments.length">
         <pv-card class="businessman-card">
           <template #title>
-            <i class="pi pi-truck"></i> Últimos Envíos Asignados
+            <i class="pi pi-truck"></i> {{ t('home.recentShipments') }}
           </template>
           <template #content>
             <div class="horizontal-grid" :class="{ 'scrollable-x': shipments.length > 6 }">
@@ -87,7 +94,9 @@ export default {
                   <p><strong>{{ s.destiny }}</strong> — {{ s.status }}</p>
                   <p class="muted">{{ formatDate(s.createdAt) }}</p>
                 </div>
-                <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">Ver Detalle</pv-button>
+                <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">
+                  {{ t('home.viewDetail') }}
+                </pv-button>
               </div>
             </div>
           </template>
@@ -97,7 +106,7 @@ export default {
       <div class="card-column" v-if="vehicles.length">
         <pv-card class="businessman-card">
           <template #title>
-            <i class="pi pi-car"></i> Vehículos Asignados
+            <i class="pi pi-car"></i> {{ t('home.assignedVehicles') }}
           </template>
           <template #content>
             <div class="horizontal-grid" :class="{ 'scrollable-x': vehicles.length > 6 }">
@@ -105,7 +114,9 @@ export default {
                 <div class="entry-content">
                   <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
                 </div>
-                <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">Ver Detalle</pv-button>
+                <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">
+                  {{ t('home.viewDetail') }}
+                </pv-button>
               </div>
             </div>
           </template>
@@ -116,7 +127,7 @@ export default {
     <div class="reports-section" v-if="reports.length">
       <pv-card class="businessman-card reports-card">
         <template #title>
-          <i class="pi pi-file"></i> Tus Reportes Recientes
+          <i class="pi pi-file"></i> {{ t('home.recentReports') }}
         </template>
         <template #content>
           <div class="reports-carousel">
@@ -126,7 +137,9 @@ export default {
                 <p>{{ r.description }}</p>
                 <p class="muted">{{ formatDate(r.createdAt) }}</p>
               </div>
-              <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">Ver Detalle</pv-button>
+              <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">
+                {{ t('home.viewDetail') }}
+              </pv-button>
             </div>
           </div>
         </template>
@@ -134,6 +147,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 /* Reutilizamos estilos del businessman */

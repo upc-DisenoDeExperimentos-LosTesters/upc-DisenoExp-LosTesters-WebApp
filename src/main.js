@@ -2,6 +2,9 @@ import { createApp } from 'vue';
 import './style.css';
 import App from './app.vue';
 
+import i18n from './i18n';
+
+
 import 'primevue/resources/themes/md-light-indigo/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
@@ -31,6 +34,7 @@ const app = createApp(App);
 app.use(PrimeVue, { ripple: true })
     .use(ToastService)
     .use(router)
+    .use(i18n)
     .component('pv-sidebar', Sidebar)
     .component('pv-dialog', Dialog)
     .component('pv-toolbar', Toolbar)
