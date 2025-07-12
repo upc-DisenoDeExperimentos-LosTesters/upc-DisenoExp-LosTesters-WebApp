@@ -4,7 +4,17 @@
     "recentShipments": "Latest Assigned Shipments",
     "assignedVehicles": "Assigned Vehicles",
     "recentReports": "Your Recent Reports",
-    "viewDetail": "View Detail"
+    "viewDetail": "View Detail",
+    "themeTitle": "Change theme mode",
+    "themeDescription": "Switch between light and dark mode for better visibility.",
+    "shipmentsTitle": "Your recent shipments",
+    "shipmentsDescription": "Check the latest shipments assigned to you.",
+    "vehiclesTitle": "Assigned vehicles",
+    "vehiclesDescription": "View the vehicles registered under your name.",
+    "reportsTitle": "Recent reports",
+    "reportsDescription": "See the latest reports you’ve submitted.",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
   },
   "profile": {
     "title": "Profile",

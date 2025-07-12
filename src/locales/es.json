@@ -4,7 +4,17 @@
     "recentShipments": "Últimos Envíos Asignados",
     "assignedVehicles": "Vehículos Asignados",
     "recentReports": "Tus Reportes Recientes",
-    "viewDetail": "Ver Detalle"
+    "viewDetail": "Ver Detalle",
+    "themeTitle": "Cambiar modo de tema",
+    "themeDescription": "Activa el modo claro u oscuro para una mejor experiencia.",
+    "shipmentsTitle": "Tus últimos envíos",
+    "shipmentsDescription": "Aquí puedes ver los envíos más recientes asignados.",
+    "vehiclesTitle": "Vehículos asignados",
+    "vehiclesDescription": "Mira los vehículos que están registrados a tu nombre.",
+    "reportsTitle": "Reportes recientes",
+    "reportsDescription": "Aquí puedes revisar los últimos reportes que has realizado.",
+    "lightMode": "Modo Claro",
+    "darkMode": "Modo Oscuro"
   },
   "profile": {
     "title": "Perfil",
