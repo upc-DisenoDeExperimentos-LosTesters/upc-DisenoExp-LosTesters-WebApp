@@ -17,7 +17,7 @@
   },
   "sidebar": {
     "home": "Home",
-    "organization": "Organization",
+    "shipments": "Shipments",
     "reports": "Reports",
     "vehicles": "Vehicles",
     "settings": "Settings",
@@ -32,6 +32,7 @@
     "descriptionPlaceholder": "Describe the incident...",
     "send": "Send",
     "sentReports": "Submitted Reports",
+    "emptyMessage": "You haven't submitted any reports yet.",
     "types": {
       "Dirección incorrecta": "Wrong address",
       "Cliente no disponible": "Client unavailable",
@@ -40,6 +41,33 @@
       "Problema con paquete": "Package issue",
       "Infracción vehicular": "Traffic violation",
       "Otro": "Other"
+    }
+  },
+  "vehicles": {
+    "myVehicles": "My Vehicles",
+    "noVehicles": "No vehicles registered.",
+    "model": "Model",
+    "plate": "License Plate",
+    "serialNumber": "Serial Number",
+    "viewDetail": "View Details",
+    "confirmDelete": "Are you sure you want to delete this vehicle?",
+    "errors": {
+      "incomplete": "Please complete all fields.",
+      "forbidden": "The vehicle contains forbidden words.",
+      "save": "Error saving vehicle.",
+      "delete": "Error deleting vehicle."
+    }
+  },
+  "shipments": {
+    "assignedTitle": "Assigned Shipments",
+    "empty": "You have no assigned shipments.",
+    "destiny": "Destination",
+    "description": "Description",
+    "status": "Status",
+    "date": "Date",
+    "viewDetail": "View Details",
+    "errors": {
+      "fetch": "Error fetching shipments."
     }
   }
 

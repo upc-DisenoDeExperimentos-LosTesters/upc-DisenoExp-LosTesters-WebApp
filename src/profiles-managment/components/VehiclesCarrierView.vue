@@ -79,11 +79,11 @@ export default {
       this.error = "";
       const { licensePlate, model, serialNumber } = this.form;
       if (!licensePlate || !model || !serialNumber) {
-        this.error = "Completa todos los campos.";
+        this.error = this.$t('vehicles.errors.incomplete');
         return;
       }
       if (containsForbiddenWords(licensePlate) || containsForbiddenWords(model)) {
-        this.error = "El vehículo contiene palabras no permitidas.";
+        this.error = this.$t('vehicles.errors.forbidden');
         return;
       }
       try {
@@ -95,16 +95,16 @@ export default {
         this.showModal = false;
         await this.fetchVehicles();
       } catch (e) {
-        this.error = "Error al guardar el vehículo.";
+        this.error = this.$t('vehicles.errors.save');
       }
     },
     async deleteVehicle(id) {
-      if (confirm("¿Estás seguro de que deseas eliminar este vehículo?")) {
+      if (confirm(this.$t('vehicles.confirmDelete'))) {
         try {
           await http.delete(`/vehicles/${id}`);
           await this.fetchVehicles();
         } catch {
-          alert("Error al eliminar el vehículo.");
+          alert(this.$t('vehicles.errors.delete'));
         }
       }
     }
@@ -118,7 +118,7 @@ export default {
     <sidebar-carrier />
     <div class="vehicle-list-container">
       <div class="header-row">
-        <h2 class="title">Mis Vehículos</h2>
+        <h2 class="title">{{ $t('vehicles.myVehicles') }}</h2>
       </div>
 
       <div v-if="loading" class="vehicle-grid">
@@ -126,18 +126,18 @@ export default {
       </div>
 
       <div v-else-if="filteredVehicles.length === 0" class="no-vehicles">
-        No hay vehículos registrados.
+        {{ $t('vehicles.noVehicles') }}
       </div>
 
       <div v-else class="vehicle-grid">
         <div v-for="v in filteredVehicles" :key="v.id" class="vehicle-card">
           <div class="vehicle-info">
-            <p><strong>Modelo:</strong> {{ v.model }}</p>
-            <p><strong>Placa:</strong> {{ v.licensePlate }}</p>
-            <p><strong>N° de serie:</strong> {{ v.serialNumber }}</p>
+            <p><strong>{{ $t('vehicles.model') }}:</strong> {{ v.model }}</p>
+            <p><strong>{{ $t('vehicles.plate') }}:</strong> {{ v.licensePlate }}</p>
+            <p><strong>{{ $t('vehicles.serialNumber') }}:</strong> {{ v.serialNumber }}</p>
           </div>
           <div class="vehicle-actions">
-            <pv-button class="detail-btn" text size="small" @click="goToVehicleDetail(v.id)">Ver Detalle</pv-button>
+            <pv-button class="detail-btn" text size="small" @click="goToVehicleDetail(v.id)"> {{ $t('vehicles.viewDetail') }}</pv-button>
           </div>
         </div>
       </div>

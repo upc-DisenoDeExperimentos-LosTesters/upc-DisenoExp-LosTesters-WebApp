@@ -38,25 +38,25 @@
             <li @click="goTo(`/${this.id}/home-driver-menu`)">
               <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
                 <i class="pi pi-home mr-2 text-xl"></i>
-                <span class="font-medium text-xl">Home</span>
+                <span class="font-medium text-xl">{{ $t('sidebar.home') }}</span>
               </a>
             </li>
             <li @click="goTo(`/${this.id}/report/carrier`)">
               <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
                 <i class="pi pi-chart-bar mr-2 text-xl"></i>
-                <span class="font-medium text-xl">Reports</span>
+                <span class="font-medium text-xl">{{ $t('sidebar.reports') }}</span>
               </a>
             </li>
             <li @click="goTo(`/${this.id}/shipments-carrier`)">
               <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
                 <i class="pi pi-send mr-2 text-xl"></i>
-                <span class="font-medium text-xl">Shipments</span>
+                <span class="font-medium text-xl">{{ $t('sidebar.shipments') }}</span>
               </a>
             </li>
             <li @click="goTo(`/${this.id}/vehicles-carrier`)">
               <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
                 <i class="pi pi-truck mr-2 text-xl"></i>
-                <span class="font-medium text-xl">Vehicles</span>
+                <span class="font-medium text-xl">{{ $t('sidebar.vehicles') }}</span>
               </a>
             </li>
           </ul>
@@ -64,16 +64,25 @@
 
         <div>
           <ul class="list-none p-3 m-0">
-            <li @click="goToProfile">
+<!--            <li @click="goToProfile">-->
+<!--              <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">-->
+<!--                <i class="pi pi-cog mr-2 text-xl"></i>-->
+<!--                <span class="font-medium text-xl">Settings</span>-->
+<!--              </a>-->
+<!--            </li>-->
+            <li @click="toggleLanguage">
               <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
-                <i class="pi pi-cog mr-2 text-xl"></i>
-                <span class="font-medium text-xl">Settings</span>
+                <i class="pi pi-globe mr-2 text-xl"></i>
+                <span class="font-medium text-xl">
+                {{ $i18n.locale === 'es' ? 'EN' : 'ES' }}
+              </span>
               </a>
             </li>
+
             <li @click="logout">
               <a class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple">
                 <i class="pi pi-sign-out mr-2 text-xl"></i>
-                <span class="font-medium text-xl">Logout</span>
+                <span class="font-medium text-xl">{{ $t('sidebar.logout') }}</span>
               </a>
             </li>
           </ul>
@@ -132,6 +141,8 @@ export default {
   created() {
     window.addEventListener("resize", this.handleResize);
     this.handleResize();
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang) this.$i18n.locale = savedLang;
 
     this.api.getProfileById(this.id).then((res) => {
       this.name = res.data.name;
@@ -142,6 +153,11 @@ export default {
     window.removeEventListener("resize", this.handleResize);
   },
   methods: {
+    toggleLanguage() {
+      const newLocale = this.$i18n.locale === 'es' ? 'en' : 'es';
+      this.$i18n.locale = newLocale;
+      localStorage.setItem('lang', newLocale);
+    },
     handleResize() {
       this.isMobile = window.innerWidth <= 860;
       this.sidebarOpen = !this.isMobile;

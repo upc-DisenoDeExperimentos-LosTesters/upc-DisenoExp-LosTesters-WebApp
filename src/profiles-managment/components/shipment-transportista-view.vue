@@ -30,7 +30,7 @@ export default {
         const res = await http.get("/shipments");
         this.shipments = Array.isArray(res.data) ? res.data : [];
       } catch {
-        this.error = "Error al obtener los envíos.";
+        this.error = this.$t('shipments.errors.fetch');
       } finally {
         this.loading = false;
       }
@@ -45,31 +45,29 @@ export default {
 };
 </script>
 
-
-
 <template>
   <div class="container">
     <sidebar-carrier />
     <div class="content">
-      <h2 class="title">Envíos Asignados</h2>
+      <h2 class="title">{{ $t('shipments.assignedTitle') }}</h2>
 
       <div v-if="loading" class="skeleton-list">
         <div v-for="n in 4" :key="'skeleton-' + n" class="shipment-skeleton"></div>
       </div>
 
       <div v-else-if="assignedShipments.length === 0" class="no-shipments">
-        No tienes envíos asignados.
+        {{ $t('shipments.empty') }}
       </div>
 
       <div v-else class="shipments-list">
         <Card v-for="s in assignedShipments" :key="s.id" class="shipment-card">
-          <template #title>Destino: {{ s.destiny }}</template>
+          <template #title>{{ $t('shipments.destiny') }}: {{ s.destiny }}</template>
           <template #content>
-            <p><strong>Descripción:</strong> {{ s.description }}</p>
-            <p><strong>Estado:</strong> {{ s.status }}</p>
-            <p><strong>Fecha:</strong> {{ formatDate(s.createdAt) }}</p>
+            <p><strong>{{ $t('shipments.description') }}:</strong> {{ s.description }}</p>
+            <p><strong>{{ $t('shipments.status') }}:</strong> {{ s.status }}</p>
+            <p><strong>{{ $t('shipments.date') }}:</strong> {{ formatDate(s.createdAt) }}</p>
             <Button
-                label="Ver Detalle"
+                :label="$t('shipments.viewDetail')"
                 class="p-button-info p-button-sm btn-space"
                 @click="goToDetail(s.id)"
             />
@@ -79,6 +77,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 
 <style scoped>

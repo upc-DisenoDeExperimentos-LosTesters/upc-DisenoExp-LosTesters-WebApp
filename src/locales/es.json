@@ -17,7 +17,7 @@
   },
   "sidebar": {
     "home": "Inicio",
-    "organization": "Organización",
+    "shipments": "Cargamentos",
     "reports": "Reportes",
     "vehicles": "Vehículos",
     "settings": "Configuración",
@@ -32,6 +32,7 @@
     "descriptionPlaceholder": "Describe el incidente...",
     "send": "Enviar",
     "sentReports": "Reportes Enviados",
+    "emptyMessage": "Aún no has enviado ningún reporte.",
     "types": {
       "Dirección incorrecta": "Dirección incorrecta",
       "Cliente no disponible": "Cliente no disponible",
@@ -40,6 +41,33 @@
       "Problema con paquete": "Problema con paquete",
       "Infracción vehicular": "Infracción vehicular",
       "Otro": "Otro"
+    }
+  },
+  "vehicles": {
+    "myVehicles": "Mis Vehículos",
+    "noVehicles": "No hay vehículos registrados.",
+    "model": "Modelo",
+    "plate": "Placa",
+    "serialNumber": "N° de serie",
+    "viewDetail": "Ver Detalle",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar este vehículo?",
+    "errors": {
+      "incomplete": "Completa todos los campos.",
+      "forbidden": "El vehículo contiene palabras no permitidas.",
+      "save": "Error al guardar el vehículo.",
+      "delete": "Error al eliminar el vehículo."
+    }
+  },
+  "shipments": {
+    "assignedTitle": "Envíos Asignados",
+    "empty": "No tienes envíos asignados.",
+    "destiny": "Destino",
+    "description": "Descripción",
+    "status": "Estado",
+    "date": "Fecha",
+    "viewDetail": "Ver Detalle",
+    "errors": {
+      "fetch": "Error al obtener los envíos."
     }
   }
 }
