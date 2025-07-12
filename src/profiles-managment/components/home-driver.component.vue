@@ -15,6 +15,7 @@ export default {
       loadingShipments: true,
       loadingVehicles: true,
       loadingReports: true,
+      isDarkMode: true, // Modo por defecto
       homeApi: new HomeApiService(),
       api: new IamApiService()
     };
@@ -40,7 +41,6 @@ export default {
       this.reports = reportsRes.data
           .filter(r => Number(r.userId) === this.id)
           .slice(0, 5);
-
     } catch (error) {
       console.error("Error cargando datos del home:", error);
     } finally {
@@ -61,10 +61,14 @@ export default {
     },
     goToReport(id) {
       this.$router.push(`/report/${id}`);
+    },
+    toggleTheme() {
+      this.isDarkMode = !this.isDarkMode;
     }
   }
 };
 </script>
+
 
 <script setup>
 import { useI18n } from 'vue-i18n';
@@ -75,17 +79,23 @@ const { t } = useI18n();
 
 
 <template>
-  <div class="container-home-businessman">
+  <div :class="['container-home-businessman', isDarkMode ? 'dark-theme' : 'light-theme']">
+    <!-- Botón de cambio de tema -->
+    <button class="theme-toggle-btn" @click="toggleTheme">
+      {{ isDarkMode ? 'Modo Claro' : 'Modo Oscuro' }}
+    </button>
+
     <div class="image-title-container mb-4">
-      <h1>{{ t('home.welcome') }}, {{ name }} {{ lastName }}!</h1>
+      <h1>¡Bienvenido, {{ name }} {{ lastName }}!</h1>
       <img src="../../public/assets/logo.png" class="img-home" />
     </div>
 
     <div class="card-grid">
+      <!-- Shipments -->
       <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
-            <i class="pi pi-truck"></i> {{ t('home.recentShipments') }}
+            <i class="pi pi-truck"></i> Envíos recientes
           </template>
           <template #content>
             <div v-if="loadingShipments">
@@ -98,7 +108,7 @@ const { t } = useI18n();
                   <p class="muted">{{ formatDate(s.createdAt) }}</p>
                 </div>
                 <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">
-                  {{ t('home.viewDetail') }}
+                  Ver detalle
                 </pv-button>
               </div>
             </div>
@@ -106,10 +116,11 @@ const { t } = useI18n();
         </pv-card>
       </div>
 
+      <!-- Vehicles -->
       <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
-            <i class="pi pi-car"></i> {{ t('home.assignedVehicles') }}
+            <i class="pi pi-car"></i> Vehículos asignados
           </template>
           <template #content>
             <div v-if="loadingVehicles">
@@ -121,7 +132,7 @@ const { t } = useI18n();
                   <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
                 </div>
                 <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">
-                  {{ t('home.viewDetail') }}
+                  Ver detalle
                 </pv-button>
               </div>
             </div>
@@ -130,10 +141,11 @@ const { t } = useI18n();
       </div>
     </div>
 
+    <!-- Reports -->
     <div class="reports-section">
       <pv-card class="businessman-card reports-card">
         <template #title>
-          <i class="pi pi-file"></i> {{ t('home.recentReports') }}
+          <i class="pi pi-file"></i> Reportes recientes
         </template>
         <template #content>
           <div v-if="loadingReports">
@@ -147,7 +159,7 @@ const { t } = useI18n();
                 <p class="muted">{{ formatDate(r.createdAt) }}</p>
               </div>
               <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">
-                {{ t('home.viewDetail') }}
+                Ver detalle
               </pv-button>
             </div>
           </div>
@@ -156,6 +168,7 @@ const { t } = useI18n();
     </div>
   </div>
 </template>
+
 
 
 
@@ -169,7 +182,37 @@ const { t } = useI18n();
   height: 100vh;
   overflow-y: auto;
   padding: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+
+.dark-theme {
   background: #181c23;
+  color: #f3f3f3;
+}
+
+.light-theme {
+  background: #f3f3f3;
+  color: #181c23;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: #f39c12;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1000;
+  font-weight: bold;
+}
+
+.img-home {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
 }
 .image-title-container {
   display: flex;
@@ -178,11 +221,7 @@ const { t } = useI18n();
   gap: 1rem;
   flex-wrap: wrap;
 }
-.img-home {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-}
+
 .card-grid {
   display: flex;
   flex-wrap: wrap;
@@ -201,23 +240,29 @@ const { t } = useI18n();
 .businessman-card {
   width: 100%;
   max-width: 380px;
-  background: #232a34 !important;
   border-radius: 18px !important;
   box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.10);
-  color: #f3f3f3 !important;
   border: none !important;
   margin: 0 auto;
 }
+
+.dark-theme .businessman-card {
+  background: #232a34 !important;
+  color: #f3f3f3 !important;
+}
+.light-theme .businessman-card {
+  background: #ffffff !important;
+  color: #181c23 !important;
+}
+
 .entry-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #232a34;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  color: #f3f3f3;
-  border: 1px solid #232a34;
+  border: 1px solid #ccc;
 }
 .entry-content {
   flex: 1;
@@ -226,7 +271,7 @@ const { t } = useI18n();
 .detail-btn {
   margin-left: 1rem;
   white-space: nowrap;
-  background: #F39C12 !important;
+  background: #f39c12 !important;
   color: #fff !important;
   border-radius: 6px !important;
   font-weight: 500;
@@ -235,9 +280,10 @@ const { t } = useI18n();
   background: #d35400 !important;
 }
 .muted {
-  color: #b0b6be;
   font-size: 0.875rem;
+  color: #999;
 }
+
 .reports-section {
   margin-top: 2.5rem;
   display: flex;
@@ -246,8 +292,8 @@ const { t } = useI18n();
 .reports-card {
   max-width: 100%;
   width: 90vw;
-  background: #232a34 !important;
 }
+
 .reports-carousel {
   display: flex;
   flex-direction: row;
@@ -255,31 +301,33 @@ const { t } = useI18n();
   overflow-x: auto;
   padding-bottom: 0.5rem;
   scrollbar-width: thin;
-  scrollbar-color: #F39C12 #232a34;
 }
+
 .report-entry-card {
   min-width: 260px;
   max-width: 320px;
   flex: 0 0 auto;
-  background: #232a34;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  color: #f3f3f3;
-  border: 1px solid #232a34;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-.report-entry-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  background: #252d38;
+
+.dark-theme .report-entry-card {
+  background: #232a34;
+  color: #f3f3f3;
+}
+.light-theme .report-entry-card {
+  background: #ffffff;
+  color: #181c23;
 }
 
 .skeleton-entry {
   width: 100%;
   height: 80px;
-  background: linear-gradient(90deg, #2c333f 25%, #3d4451 50%, #2c333f 75%);
+  background: linear-gradient(90deg, #ccc 25%, #ddd 50%, #ccc 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
   border-radius: 12px;
