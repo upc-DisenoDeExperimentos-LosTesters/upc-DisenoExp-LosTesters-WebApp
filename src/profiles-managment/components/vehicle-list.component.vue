@@ -5,17 +5,12 @@ import http from "../../shared/services/http-common.js";
 
 function containsForbiddenWords(text) {
   const forbiddenWords = [
-    "trump", "hitler", "putin", "bin laden", "al qaeda",
-    "isis", "taliban", "nazi", "terrorist", "osama",
-    "dictator", "satan", "lucifer", "devil", "fuck",
-    "shit", "bitch", "asshole", "bastard", "nigger",
-    "slut", "whore", "rape", "killer", "murderer",
-    "pedo", "pedophile", "pakistan", "iran", "iraq",
-    "hamas", "hezbollah", "hitman", "cartel", "mafia",
-    "drugs", "cocaine", "meth", "narco", "gang",
+    "trump", "hitler", "putin", "bin laden", "al qaeda", "isis", "taliban", "nazi", "terrorist", "osama",
+    "dictator", "satan", "lucifer", "devil", "fuck", "shit", "bitch", "asshole", "bastard", "nigger",
+    "slut", "whore", "rape", "killer", "murderer", "pedo", "pedophile", "pakistan", "iran", "iraq",
+    "hamas", "hezbollah", "hitman", "cartel", "mafia", "drugs", "cocaine", "meth", "narco", "gang",
     "fascist", "racist"
   ];
-
   const lowerText = text.toLowerCase();
   return forbiddenWords.some(word => lowerText.includes(word));
 }
@@ -83,9 +78,8 @@ export default {
     },
     openModal(vehicle = null) {
       this.isEditing = !!vehicle;
-
       this.form = {
-        id: vehicle?.id || null,  // ✅ ahora el ID siempre está definido
+        id: vehicle?.id || null,
         licensePlate: vehicle?.licensePlate || "",
         model: vehicle?.model || "",
         serialNumber: vehicle?.serialNumber || "",
@@ -94,7 +88,6 @@ export default {
             ? this.userId
             : vehicle?.idTransportista || ""
       };
-
       this.error = "";
       this.showModal = true;
     },
@@ -108,7 +101,7 @@ export default {
         this.error = "Completa todos los campos.";
         return;
       }
-      if (containsForbiddenWords(this.form.licensePlate) || containsForbiddenWords(this.form.model)) {
+      if (containsForbiddenWords(licensePlate) || containsForbiddenWords(model)) {
         this.error = "El vehículo contiene palabras no permitidas.";
         return;
       }
@@ -138,7 +131,6 @@ export default {
 };
 </script>
 
-
 <template>
   <div class="container">
     <sidebar />
@@ -147,8 +139,15 @@ export default {
         <h2 class="title">Vehículos Registrados</h2>
         <pv-button class="add-btn" icon="pi pi-plus" label="Agregar Vehículo" @click="openModal" />
       </div>
-      <div v-if="loading" class="loading">Cargando...</div>
-      <div v-else-if="filteredVehicles.length === 0" class="no-vehicles">No hay vehículos registrados.</div>
+
+      <div v-if="loading" class="vehicle-grid">
+        <div v-for="n in 3" :key="'skeleton-v-' + n" class="vehicle-card skeleton-card"></div>
+      </div>
+
+      <div v-else-if="filteredVehicles.length === 0" class="no-vehicles">
+        No hay vehículos registrados.
+      </div>
+
       <div v-else class="vehicle-grid">
         <div v-for="v in filteredVehicles" :key="v.id" class="vehicle-card">
           <div class="vehicle-info">
@@ -161,7 +160,6 @@ export default {
             <pv-button class="edit-btn" text size="small" @click="openModal(v)">Editar</pv-button>
             <pv-button class="delete-btn" text size="small" @click="deleteVehicle(v.id)">Eliminar</pv-button>
           </div>
-
         </div>
       </div>
     </div>
@@ -180,8 +178,8 @@ export default {
           <label>N° de serie
             <input v-model="form.serialNumber" type="text" required />
           </label>
-<label>ID Propietario
-<input v-model="form.idPropietario" type="number" required :readonly="true" :value="form.idPropietario" />
+          <label>ID Propietario
+            <input v-model="form.idPropietario" type="number" required readonly />
           </label>
           <label>ID Transportista
             <template v-if="userType === 'GERENTE'">
@@ -192,7 +190,6 @@ export default {
                 </option>
               </select>
             </template>
-
             <template v-else>
               <input v-model="form.idTransportista" type="number" required readonly />
             </template>
@@ -214,6 +211,7 @@ export default {
   min-height: 100vh;
   background: #181c23;
 }
+
 .vehicle-list-container {
   flex: 1 1 0;
   padding: 2rem;
@@ -223,6 +221,7 @@ export default {
   box-sizing: border-box;
   overflow-x: auto;
 }
+
 .header-row {
   display: flex;
   justify-content: space-between;
@@ -230,10 +229,12 @@ export default {
   margin-bottom: 2rem;
   gap: 1rem;
 }
+
 .title {
   color: #F39C12;
   margin: 0;
 }
+
 .add-btn {
   background: #F39C12 !important;
   color: #fff !important;
@@ -241,20 +242,24 @@ export default {
   font-weight: 500;
   border: none;
 }
+
 .add-btn:hover {
   background: #d35400 !important;
 }
-.loading, .no-vehicles {
+
+.no-vehicles {
   color: #fff;
   text-align: center;
   margin-top: 2rem;
 }
+
 .vehicle-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 2rem;
   justify-items: center;
 }
+
 .vehicle-card {
   background: #232a34;
   color: #f3f3f3;
@@ -267,10 +272,12 @@ export default {
   flex-direction: column;
   align-items: flex-start;
 }
+
 .vehicle-info p {
   margin: 0 0 0.7rem 0;
   font-size: 1.1rem;
 }
+
 .detail-btn {
   margin-top: 1rem;
   background: #F39C12 !important;
@@ -278,11 +285,38 @@ export default {
   border-radius: 6px !important;
   font-weight: 500;
 }
+
 .detail-btn:hover {
   background: #d35400 !important;
 }
 
-/* Modal styles */
+.vehicle-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Skeleton Card */
+.skeleton-card {
+  height: 160px;
+  background: linear-gradient(90deg, #2f3440 25%, #444b58 50%, #2f3440 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 320px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -292,6 +326,7 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
 .modal-card {
   background: #232a34;
   color: #fff;
@@ -304,16 +339,19 @@ export default {
   flex-direction: column;
   gap: 1rem;
 }
+
 .modal-card h3 {
   color: #F39C12;
   margin-bottom: 1rem;
 }
+
 .modal-card label {
   display: flex;
   flex-direction: column;
   margin-bottom: 0.7rem;
   font-weight: 500;
 }
+
 .modal-card input {
   margin-top: 0.3rem;
   padding: 0.5rem;
@@ -322,12 +360,14 @@ export default {
   background: #181c23;
   color: #fff;
 }
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
 }
+
 .modal-actions button {
   background: #F39C12;
   color: #fff;
@@ -338,63 +378,52 @@ export default {
   cursor: pointer;
   transition: background 0.2s;
 }
+
 .modal-actions button[type="button"] {
   background: #444;
 }
+
 .modal-actions button:hover {
   background: #d35400;
 }
+
 .error {
   color: #ff7675;
   margin-top: 0.5rem;
   font-size: 1rem;
 }
+
+/* Responsive */
 @media (max-width: 860px) {
   .vehicle-list-container {
     margin-left: 0 !important;
     padding: 1rem;
   }
+
   .header-row {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
 }
+
 @media (max-width: 600px) {
   .vehicle-list-container {
     padding: 0.5rem;
   }
+
   .vehicle-card {
     padding: 1rem 0.5rem;
     max-width: 100vw;
   }
+
   .modal-card {
     min-width: 0;
     padding: 1rem 0.5rem;
   }
-}
-.vehicle-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-.edit-btn {
-  background: #3498db !important;
-  color: #fff !important;
-  border-radius: 6px !important;
-  font-weight: 500;
-}
-.edit-btn:hover {
-  background: #2980b9 !important;
-}
-.delete-btn {
-  background: #e74c3c !important;
-  color: #fff !important;
-  border-radius: 6px !important;
-  font-weight: 500;
-}
-.delete-btn:hover {
-  background: #c0392b !important;
-}
 
+  .skeleton-card {
+    max-width: 100vw;
+  }
+}
 </style>
