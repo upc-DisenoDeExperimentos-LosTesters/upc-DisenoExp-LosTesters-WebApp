@@ -22,6 +22,25 @@
     "vehicles": "Vehicles",
     "settings": "Settings",
     "logout": "Logout"
+  },
+  "reports": {
+    "myReports": "My Reports",
+    "newReport": "New Report",
+    "reportType": "Report Type",
+    "selectType": "Select type",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the incident...",
+    "send": "Send",
+    "sentReports": "Submitted Reports",
+    "types": {
+      "Dirección incorrecta": "Wrong address",
+      "Cliente no disponible": "Client unavailable",
+      "Accidente": "Accident",
+      "Problema técnico": "Technical issue",
+      "Problema con paquete": "Package issue",
+      "Infracción vehicular": "Traffic violation",
+      "Otro": "Other"
+    }
   }
 
 }

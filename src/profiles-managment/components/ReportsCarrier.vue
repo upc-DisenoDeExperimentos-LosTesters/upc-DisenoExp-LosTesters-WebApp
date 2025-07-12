@@ -7,6 +7,11 @@ export default {
   components: {
     SidebarCarrier
   },
+  computed: {
+    translatedTypes() {
+      return this.reportTypes.map(type => this.$t(`reports.types.${type}`));
+    }
+  },
   data() {
     return {
       type: null,
@@ -23,6 +28,7 @@ export default {
         "Otro"
       ],
       reportsApi: new HomeApiService()
+
     };
   },
   async created() {
@@ -79,41 +85,49 @@ export default {
 };
 </script>
 
+<script setup>
+import { useI18n } from 'vue-i18n';
+import { HomeApiService } from "../services/home-api.service.js";
+import SidebarCarrier from "../../public/components/sidebar-carrier.vue";
+
+const { t } = useI18n();
+</script>
+
 <template>
   <div class="carrier-report-container">
     <SidebarCarrier />
 
     <div class="main-content">
-      <h2>Mis Reportes</h2>
+      <h2>{{ t('reports.myReports') }}</h2>
 
       <pv-card class="form-card">
         <template #title>
-          <i class="pi pi-plus-circle"></i> Nuevo Reporte
+          <i class="pi pi-plus-circle"></i> {{ t('reports.newReport') }}
         </template>
         <template #content>
           <div class="form-group">
-            <label for="type">Tipo de Reporte</label>
+            <label for="type">{{ t('reports.reportType') }}</label>
             <pv-dropdown
                 v-model="type"
-                :options="reportTypes"
-                placeholder="Selecciona tipo"
+                :options="translatedTypes"
+                :placeholder="t('reports.selectType')"
                 class="dropdown-full"
             />
           </div>
 
           <div class="form-group">
-            <label for="description">Descripción</label>
+            <label for="description">{{ t('reports.description') }}</label>
             <textarea
                 v-model="description"
                 class="description-area"
                 rows="4"
-                placeholder="Describe el incidente..."
+                :placeholder="t('reports.descriptionPlaceholder')"
             ></textarea>
           </div>
 
           <pv-button
               icon="pi pi-send"
-              label="Enviar"
+              :label="t('reports.send')"
               class="p-button-warning"
               @click="submitReport"
               :disabled="!type || !description"
@@ -121,13 +135,9 @@ export default {
         </template>
       </pv-card>
 
-      <h3>Reportes Enviados</h3>
+      <h3>{{ t('reports.sentReports') }}</h3>
       <div class="reports-list">
-        <pv-card
-            v-for="report in reports"
-            :key="report.id"
-            class="report-card"
-        >
+        <pv-card v-for="report in reports" :key="report.id" class="report-card">
           <template #title>
             {{ report.type }}
           </template>
@@ -140,6 +150,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .carrier-report-container {

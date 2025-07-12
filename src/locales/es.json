@@ -22,5 +22,24 @@
     "vehicles": "Vehículos",
     "settings": "Configuración",
     "logout": "Cerrar sesión"
+  },
+  "reports": {
+    "myReports": "Mis Reportes",
+    "newReport": "Nuevo Reporte",
+    "reportType": "Tipo de Reporte",
+    "selectType": "Selecciona tipo",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe el incidente...",
+    "send": "Enviar",
+    "sentReports": "Reportes Enviados",
+    "types": {
+      "Dirección incorrecta": "Dirección incorrecta",
+      "Cliente no disponible": "Cliente no disponible",
+      "Accidente": "Accidente",
+      "Problema técnico": "Problema técnico",
+      "Problema con paquete": "Problema con paquete",
+      "Infracción vehicular": "Infracción vehicular",
+      "Otro": "Otro"
+    }
   }
 }
