@@ -7,17 +7,13 @@ export default {
   components: {
     SidebarCarrier
   },
-  computed: {
-    translatedTypes() {
-      return this.reportTypes.map(type => this.$t(`reports.types.${type}`));
-    }
-  },
   data() {
     return {
       type: null,
       description: "",
       reports: [],
       userId: Number(localStorage.getItem("userId")),
+      loadingReports: true,
       reportTypes: [
         "Dirección incorrecta",
         "Cliente no disponible",
@@ -28,7 +24,6 @@ export default {
         "Otro"
       ],
       reportsApi: new HomeApiService()
-
     };
   },
   async created() {
@@ -36,11 +31,14 @@ export default {
   },
   methods: {
     async loadReports() {
+      this.loadingReports = true;
       try {
         const response = await this.reportsApi.getReports();
         this.reports = response.data.filter(r => r.userId === this.userId);
       } catch (error) {
         console.error("Error cargando reportes:", error);
+      } finally {
+        this.loadingReports = false;
       }
     },
     containsForbiddenWords(text) {
@@ -80,54 +78,46 @@ export default {
     formatDate(date) {
       return new Date(date).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" });
     }
-
   }
 };
 </script>
 
-<script setup>
-import { useI18n } from 'vue-i18n';
-import { HomeApiService } from "../services/home-api.service.js";
-import SidebarCarrier from "../../public/components/sidebar-carrier.vue";
-
-const { t } = useI18n();
-</script>
 
 <template>
   <div class="carrier-report-container">
     <SidebarCarrier />
 
     <div class="main-content">
-      <h2>{{ t('reports.myReports') }}</h2>
+      <h2>Mis Reportes</h2>
 
       <pv-card class="form-card">
         <template #title>
-          <i class="pi pi-plus-circle"></i> {{ t('reports.newReport') }}
+          <i class="pi pi-plus-circle"></i> Nuevo Reporte
         </template>
         <template #content>
           <div class="form-group">
-            <label for="type">{{ t('reports.reportType') }}</label>
+            <label for="type">Tipo de Reporte</label>
             <pv-dropdown
                 v-model="type"
-                :options="translatedTypes"
-                :placeholder="t('reports.selectType')"
+                :options="reportTypes"
+                placeholder="Selecciona tipo"
                 class="dropdown-full"
             />
           </div>
 
           <div class="form-group">
-            <label for="description">{{ t('reports.description') }}</label>
+            <label for="description">Descripción</label>
             <textarea
                 v-model="description"
                 class="description-area"
                 rows="4"
-                :placeholder="t('reports.descriptionPlaceholder')"
+                placeholder="Describe el incidente..."
             ></textarea>
           </div>
 
           <pv-button
               icon="pi pi-send"
-              :label="t('reports.send')"
+              label="Enviar"
               class="p-button-warning"
               @click="submitReport"
               :disabled="!type || !description"
@@ -135,22 +125,31 @@ const { t } = useI18n();
         </template>
       </pv-card>
 
-      <h3>{{ t('reports.sentReports') }}</h3>
+      <h3>Reportes Enviados</h3>
       <div class="reports-list">
-        <pv-card v-for="report in reports" :key="report.id" class="report-card">
-          <template #title>
-            {{ report.type }}
-          </template>
-          <template #content>
-            <p>{{ report.description }}</p>
-            <small class="muted">{{ formatDate(report.createdAt) }}</small>
-          </template>
-        </pv-card>
+        <template v-if="loadingReports">
+          <div class="report-card report-skeleton" v-for="n in 3" :key="'skeleton-r-' + n"></div>
+        </template>
+        <template v-else>
+          <pv-card
+              v-for="report in reports"
+              :key="report.id"
+              class="report-card"
+          >
+            <template #title>
+              {{ report.type }}
+            </template>
+            <template #content>
+              <p>{{ report.description }}</p>
+              <small class="muted">{{ formatDate(report.createdAt) }}</small>
+            </template>
+          </pv-card>
+        </template>
       </div>
+
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .carrier-report-container {
@@ -227,4 +226,23 @@ label {
     max-width: 100%;
   }
 }
+
+.report-skeleton {
+  height: 120px;
+  background: linear-gradient(90deg, #2f3440 25%, #444b58 50%, #2f3440 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 </style>
