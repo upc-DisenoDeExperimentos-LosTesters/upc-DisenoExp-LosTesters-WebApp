@@ -1,6 +1,7 @@
 <script>
 import { HomeApiService } from "../../profiles-managment/services/home-api.service.js";
 import { IamApiService } from "../../iam/services/iam-api.service.js";
+import jsPDF from "jspdf";
 
 export default {
   name: "report-view",
@@ -73,10 +74,22 @@ export default {
         const matchesDate = !this.selectedDate || new Date(report.createdAt).toDateString() === new Date(this.selectedDate).toDateString();
         return matchesUser && matchesType && matchesDate;
       });
+    },
+    downloadPDF(report) {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Reporte de Incidencia", 105, 20, null, null, "center");
+      doc.setFontSize(12);
+      doc.text(`Tipo: ${report.type}`, 20, 40);
+      doc.text(`Descripción: ${report.description}`, 20, 50);
+      doc.text(`Transportista: ${this.getUserName(report.userId)}`, 20, 60);
+      doc.text(`Fecha: ${this.formatDate(report.createdAt)}`, 20, 70);
+      doc.save(`reporte_${report.id}.pdf`);
     }
   }
 };
 </script>
+
 
 <template>
   <div class="report-view-container">
@@ -101,7 +114,10 @@ export default {
       <input type="date" v-model="selectedDate" />
     </div>
 
-    <div v-if="loading" class="loading">Cargando...</div>
+    <div v-if="loading" class="report-grid">
+      <div class="report-card skeleton" v-for="n in 4" :key="n"></div>
+    </div>
+
     <div v-else>
       <div v-if="reports.length === 0" class="no-reports">No hay reportes registrados.</div>
       <div v-else class="report-grid">
@@ -112,6 +128,7 @@ export default {
             <span><strong>Transportista:</strong> {{ getUserName(report.userId) }}</span>
             <span><strong>Fecha:</strong> {{ formatDate(report.createdAt) }}</span>
           </div>
+          <button class="pdf-btn" @click="downloadPDF(report)">Descargar PDF</button>
         </div>
       </div>
     </div>
@@ -157,6 +174,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  position: relative;
 }
 .report-title {
   font-size: 1.3rem;
@@ -172,6 +190,31 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+}
+.pdf-btn {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.pdf-btn:hover {
+  background: #e67e22;
+}
+.skeleton {
+  height: 160px;
+  background: linear-gradient(90deg, #2a2f3a 25%, #3a3f4a 50%, #2a2f3a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 14px;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 @media (max-width: 600px) {
   .report-view-container {

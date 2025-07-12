@@ -1,7 +1,8 @@
 <script>
 import { HomeApiService } from "../services/home-api.service.js";
 import { IamApiService } from "../../iam/services/iam-api.service.js";
-import { useRouter } from "vue-router";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 export default {
   name: "home-businessman",
@@ -20,6 +21,7 @@ export default {
       loadingVehicles: true,
       loadingReports: true,
       loadingUser: true,
+      isDarkMode: true,
       api: new IamApiService(),
       homeApi: new HomeApiService()
     };
@@ -48,6 +50,12 @@ export default {
     this.loadingVehicles = false;
     this.loadingReports = false;
   },
+  mounted() {
+    if (!localStorage.getItem("tutorial_shown_businessman")) {
+      this.startTutorial();
+      localStorage.setItem("tutorial_shown_businessman", "true");
+    }
+  },
   methods: {
     getUserName(id) {
       return this.userMap[id] || "Desconocido";
@@ -63,20 +71,71 @@ export default {
     },
     goToVehicle(id) {
       this.$router.push(`/vehicle/${id}`);
+    },
+    toggleTheme() {
+      this.isDarkMode = !this.isDarkMode;
+    },
+    startTutorial() {
+      driver({
+        showProgress: true,
+        steps: [
+          {
+            element: ".theme-toggle-btn",
+            popover: {
+              title: "Cambiar tema",
+              description: "Haz clic aquí para cambiar entre modo claro y oscuro.",
+              side: "left"
+            }
+          },
+          {
+            element: ".businessman-card:nth-of-type(1)",
+            popover: {
+              title: "Tus envíos",
+              description: "Aquí ves los últimos envíos.",
+              side: "top"
+            }
+          },
+          {
+            element: ".businessman-card:nth-of-type(2)",
+            popover: {
+              title: "Tus vehículos",
+              description: "Aquí ves los vehículos registrados.",
+              side: "top"
+            }
+          },
+          {
+            element: ".reports-card",
+            popover: {
+              title: "Reportes recientes",
+              description: "Revisa tus reportes recientes.",
+              side: "top"
+            }
+          }
+        ]
+      }).drive();
     }
   }
 };
 </script>
 
 
+
 <template>
-  <div class="container-home-businessman">
+  <div :class="['container-home-businessman', isDarkMode ? 'dark-theme' : 'light-theme']">
+    <div class="top-buttons">
+      <button class="theme-toggle-btn" @click="toggleTheme">
+        {{ isDarkMode ? 'Modo Claro' : 'Modo Oscuro' }}
+      </button>
+      <button class="help-btn" @click="startTutorial">?</button>
+    </div>
+
     <div class="image-title-container mb-4">
       <h1>¡Bienvenido, {{ name }} {{ lastName }}!</h1>
       <img src="../../public/assets/logo.png" class="img-home" />
     </div>
 
     <div class="card-grid">
+      <!-- Envíos -->
       <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
@@ -86,19 +145,22 @@ export default {
             <div v-if="loadingShipments">
               <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-s-' + n"></div>
             </div>
-            <div v-else class="horizontal-grid" :class="{ 'scrollable-x': shipments.length > 6 }">
-              <div v-for="s in shipments" :key="s.id" class="entry-card grid-entry-card">
+            <div v-else class="horizontal-grid">
+              <div v-for="s in shipments" :key="s.id" class="entry-card">
                 <div class="entry-content">
                   <p><strong>{{ s.destiny }}</strong> — {{ s.status }}</p>
                   <p class="muted">{{ formatDate(s.createdAt) }}</p>
                 </div>
-                <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">Ver Detalle</pv-button>
+                <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">
+                  Ver Detalle
+                </pv-button>
               </div>
             </div>
           </template>
         </pv-card>
       </div>
 
+      <!-- Vehículos -->
       <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
@@ -108,12 +170,14 @@ export default {
             <div v-if="loadingVehicles">
               <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-v-' + n"></div>
             </div>
-            <div v-else class="horizontal-grid" :class="{ 'scrollable-x': vehicles.length > 6 }">
-              <div v-for="v in vehicles" :key="v.id" class="entry-card grid-entry-card">
+            <div v-else class="horizontal-grid">
+              <div v-for="v in vehicles" :key="v.id" class="entry-card">
                 <div class="entry-content">
                   <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
                 </div>
-                <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">Ver Detalle</pv-button>
+                <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">
+                  Ver Detalle
+                </pv-button>
               </div>
             </div>
           </template>
@@ -121,6 +185,7 @@ export default {
       </div>
     </div>
 
+    <!-- Reportes -->
     <div class="reports-section">
       <pv-card class="businessman-card reports-card">
         <template #title>
@@ -131,13 +196,15 @@ export default {
             <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-r-' + n"></div>
           </div>
           <div v-else class="reports-carousel">
-            <div v-for="r in reports" :key="r.id" class="entry-card report-entry-card">
+            <div v-for="r in reports" :key="r.id" class="entry-card">
               <div class="entry-content">
                 <p><strong>{{ r.type }}</strong></p>
                 <p>{{ r.description }}</p>
                 <p class="muted">{{ formatDate(r.createdAt) }} — <em>{{ getUserName(r.userId) }}</em></p>
               </div>
-              <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">Ver Detalle</pv-button>
+              <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">
+                Ver Detalle
+              </pv-button>
             </div>
           </div>
         </template>
@@ -145,6 +212,8 @@ export default {
     </div>
   </div>
 </template>
+
+
 
 
 <style scoped>
@@ -156,16 +225,38 @@ export default {
   height: 100vh;
   overflow-y: auto;
   padding: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+.dark-theme {
   background: #181c23;
-  transition: left 0.3s, width 0.3s;
+  color: #f3f3f3;
+}
+.light-theme {
+  background: #f3f3f3;
+  color: #181c23;
 }
 
-.image-title-container {
+.top-buttons {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
+  z-index: 1000;
+}
+.theme-toggle-btn,
+.help-btn {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.help-btn {
+  font-size: 1.1rem;
+  padding: 0.4rem 0.7rem;
 }
 
 .img-home {
@@ -173,16 +264,20 @@ export default {
   height: 70px;
   border-radius: 50%;
 }
-
+.image-title-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 .card-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 2.5rem;
   justify-content: center;
-  align-items: flex-start;
   margin-top: 2rem;
 }
-
 .card-column {
   display: flex;
   justify-content: center;
@@ -190,78 +285,57 @@ export default {
   max-width: 420px;
   min-width: 320px;
 }
-
 .businessman-card {
   width: 100%;
   max-width: 380px;
-  background: #232a34 !important;
-  border-radius: 18px !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.10);
-  color: #f3f3f3 !important;
-  border: none !important;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  border: none;
   margin: 0 auto;
+  background: #fff;
+  color: #000;
 }
-
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.dark-theme .businessman-card {
+  background: #232a34;
+  color: #f3f3f3;
 }
-
 .entry-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #232a34;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  transition: box-shadow 0.2s, background 0.2s;
-  color: #f3f3f3;
-  border: 1px solid #232a34;
+  border: 1px solid #ccc;
 }
-
-.entry-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  background: #252d38;
-}
-
 .entry-content {
   flex: 1;
   min-width: 0;
 }
-
 .detail-btn {
   margin-left: 1rem;
   white-space: nowrap;
-  background: #F39C12 !important;
-  color: #fff !important;
-  border-radius: 6px !important;
+  background: #f39c12;
+  color: #fff;
+  border-radius: 6px;
   font-weight: 500;
-  transition: background 0.2s;
 }
-
 .detail-btn:hover {
-  background: #d35400 !important;
+  background: #d35400;
 }
-
 .muted {
-  color: #b0b6be;
   font-size: 0.875rem;
+  color: #999;
 }
-
 .reports-section {
   margin-top: 2.5rem;
   display: flex;
   justify-content: center;
 }
-
 .reports-card {
   max-width: 100%;
   width: 90vw;
-  background: #232a34 !important;
 }
-
 .reports-carousel {
   display: flex;
   flex-direction: row;
@@ -269,123 +343,18 @@ export default {
   overflow-x: auto;
   padding-bottom: 0.5rem;
   scrollbar-width: thin;
-  scrollbar-color: #F39C12 #232a34;
 }
-
-.report-entry-card {
-  min-width: 260px;
-  max-width: 320px;
-  flex: 0 0 auto;
-  background: #232a34;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  color: #f3f3f3;
-  border: 1px solid #232a34;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.report-entry-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  background: #252d38;
-}
-
-/* Scrollbar estilizado para la sección de reportes */
-.reports-carousel::-webkit-scrollbar {
-  height: 8px;
-}
-.reports-carousel::-webkit-scrollbar-thumb {
-  background: #F39C12;
-  border-radius: 4px;
-}
-.reports-carousel::-webkit-scrollbar-track {
-  background: #232a34;
-}
-
-/* Responsive */
-@media (max-width: 1100px) {
-  .card-grid {
-    flex-direction: column;
-    align-items: center;
-  }
-  .card-column {
-    max-width: 100%;
-    min-width: 0;
-  }
-  .reports-card {
-    width: 100vw;
-    max-width: 100vw;
-  }
-}
-
-@media (max-width: 860px) {
-  .container-home-businessman {
-    left: 0 !important;
-    width: 100vw !important;
-    padding-left: 0 !important;
-  }
-  .reports-card {
-    width: 100vw;
-    max-width: 100vw;
-  }
-}
-
-@media (max-width: 600px) {
-  .container-home-businessman {
-    padding: 0.5rem;
-  }
-  .image-title-container {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .card-column {
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-  }
-  .businessman-card {
-    max-width: 100%;
-  }
-  .entry-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    width: 100%;
-  }
-  .detail-btn {
-    margin-left: 0;
-    align-self: flex-end;
-  }
-  .reports-card {
-    width: 100vw;
-    max-width: 100vw;
-  }
-  .report-entry-card {
-    min-width: 220px;
-    max-width: 90vw;
-  }
-
-
-}
-
 .skeleton-entry {
   width: 100%;
   height: 80px;
-  background: linear-gradient(90deg, #2c333f 25%, #3d4451 50%, #2c333f 75%);
+  background: linear-gradient(90deg, #ccc 25%, #ddd 50%, #ccc 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
   border-radius: 12px;
   margin-bottom: 1rem;
 }
-
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 </style>

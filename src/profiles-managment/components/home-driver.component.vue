@@ -59,7 +59,10 @@ export default {
   },
   methods: {
     formatDate(date) {
-      return new Date(date).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" });
+      return new Date(date).toLocaleString("es-ES", {
+        dateStyle: "short",
+        timeStyle: "short"
+      });
     },
     goToShipment(id) {
       this.$router.push(`/shipment/${id}`);
@@ -80,32 +83,32 @@ export default {
           {
             element: ".theme-toggle-btn",
             popover: {
-              title: "Cambiar tema",
-              description: "Haz clic aquí para alternar entre modo oscuro y claro.",
+              title: this.$t("home.themeTitle"),
+              description: this.$t("home.themeDescription"),
               side: "left"
             }
           },
           {
             element: ".businessman-card:nth-of-type(1)",
             popover: {
-              title: "Tus envíos",
-              description: "Visualiza los envíos más recientes asignados.",
+              title: this.$t("home.shipmentsTitle"),
+              description: this.$t("home.shipmentsDescription"),
               side: "top"
             }
           },
           {
             element: ".businessman-card:nth-of-type(2)",
             popover: {
-              title: "Tus vehículos",
-              description: "Visualiza tus vehículos asignados.",
+              title: this.$t("home.vehiclesTitle"),
+              description: this.$t("home.vehiclesDescription"),
               side: "top"
             }
           },
           {
             element: ".reports-card",
             popover: {
-              title: "Reportes recientes",
-              description: "Aquí podrás consultar tus últimos reportes enviados.",
+              title: this.$t("home.reportsTitle"),
+              description: this.$t("home.reportsDescription"),
               side: "top"
             }
           }
@@ -116,38 +119,32 @@ export default {
 };
 </script>
 
-
-
 <script setup>
 import { useI18n } from 'vue-i18n';
-
 const { t } = useI18n();
 </script>
 
 
 
-
 <template>
   <div :class="['container-home-businessman', isDarkMode ? 'dark-theme' : 'light-theme']">
-    <!-- Botones superiores -->
     <div class="top-buttons">
       <button class="theme-toggle-btn" @click="toggleTheme">
-        {{ isDarkMode ? 'Modo Claro' : 'Modo Oscuro' }}
+        {{ isDarkMode ? t('home.lightMode') : t('home.darkMode') }}
       </button>
       <button class="help-btn" @click="startTutorial">?</button>
     </div>
 
     <div class="image-title-container mb-4">
-      <h1>¡Bienvenido, {{ name }} {{ lastName }}!</h1>
+      <h1>{{ t('home.welcome') }}, {{ name }} {{ lastName }}!</h1>
       <img src="../../public/assets/logo.png" class="img-home" />
     </div>
 
     <div class="card-grid">
-      <!-- Envíos -->
       <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
-            <i class="pi pi-truck"></i> Envíos recientes
+            <i class="pi pi-truck"></i> {{ t('home.recentShipments') }}
           </template>
           <template #content>
             <div v-if="loadingShipments">
@@ -160,7 +157,7 @@ const { t } = useI18n();
                   <p class="muted">{{ formatDate(s.createdAt) }}</p>
                 </div>
                 <pv-button text size="small" class="detail-btn" @click="goToShipment(s.id)">
-                  Ver detalle
+                  {{ t('home.viewDetail') }}
                 </pv-button>
               </div>
             </div>
@@ -168,11 +165,10 @@ const { t } = useI18n();
         </pv-card>
       </div>
 
-      <!-- Vehículos -->
       <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
-            <i class="pi pi-car"></i> Vehículos asignados
+            <i class="pi pi-car"></i> {{ t('home.assignedVehicles') }}
           </template>
           <template #content>
             <div v-if="loadingVehicles">
@@ -184,7 +180,7 @@ const { t } = useI18n();
                   <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
                 </div>
                 <pv-button text size="small" class="detail-btn" @click="goToVehicle(v.id)">
-                  Ver detalle
+                  {{ t('home.viewDetail') }}
                 </pv-button>
               </div>
             </div>
@@ -193,11 +189,10 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <!-- Reportes -->
     <div class="reports-section">
       <pv-card class="businessman-card reports-card">
         <template #title>
-          <i class="pi pi-file"></i> Reportes recientes
+          <i class="pi pi-file"></i> {{ t('home.recentReports') }}
         </template>
         <template #content>
           <div v-if="loadingReports">
@@ -211,7 +206,7 @@ const { t } = useI18n();
                 <p class="muted">{{ formatDate(r.createdAt) }}</p>
               </div>
               <pv-button text size="small" class="detail-btn" @click="goToReport(r.id)">
-                Ver detalle
+                {{ t('home.viewDetail') }}
               </pv-button>
             </div>
           </div>
@@ -220,6 +215,7 @@ const { t } = useI18n();
     </div>
   </div>
 </template>
+
 
 
 <style scoped>
