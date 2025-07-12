@@ -16,6 +16,10 @@ export default {
       reports: [],
       transporters: [],
       userMap: {},
+      loadingShipments: true,
+      loadingVehicles: true,
+      loadingReports: true,
+      loadingUser: true,
       api: new IamApiService(),
       homeApi: new HomeApiService()
     };
@@ -25,6 +29,7 @@ export default {
     this.name = userRes.data.name;
     this.lastName = userRes.data.lastName;
     this.type = userRes.data.type;
+    this.loadingUser = false;
 
     const [shipmentsRes, vehiclesRes, reportsRes, usersRes] = await Promise.all([
       this.homeApi.getRecentShipments(),
@@ -37,9 +42,11 @@ export default {
     this.vehicles = vehiclesRes.data.slice(0, 5);
     this.reports = reportsRes.data.slice(0, 5);
     this.transporters = usersRes.data;
-
-    // Mapeamos los transportistas para obtener nombres por id
     this.userMap = Object.fromEntries(this.transporters.map(u => [u.id, `${u.name} ${u.lastName}`]));
+
+    this.loadingShipments = false;
+    this.loadingVehicles = false;
+    this.loadingReports = false;
   },
   methods: {
     getUserName(id) {
@@ -61,6 +68,7 @@ export default {
 };
 </script>
 
+
 <template>
   <div class="container-home-businessman">
     <div class="image-title-container mb-4">
@@ -69,21 +77,17 @@ export default {
     </div>
 
     <div class="card-grid">
-      <div class="card-column" v-if="shipments.length">
+      <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
             <i class="pi pi-truck"></i> Últimos Envíos
           </template>
           <template #content>
-            <div
-              class="horizontal-grid"
-              :class="{ 'scrollable-x': shipments.length > 6 }"
-            >
-              <div
-                v-for="s in shipments"
-                :key="s.id"
-                class="entry-card grid-entry-card"
-              >
+            <div v-if="loadingShipments">
+              <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-s-' + n"></div>
+            </div>
+            <div v-else class="horizontal-grid" :class="{ 'scrollable-x': shipments.length > 6 }">
+              <div v-for="s in shipments" :key="s.id" class="entry-card grid-entry-card">
                 <div class="entry-content">
                   <p><strong>{{ s.destiny }}</strong> — {{ s.status }}</p>
                   <p class="muted">{{ formatDate(s.createdAt) }}</p>
@@ -95,21 +99,17 @@ export default {
         </pv-card>
       </div>
 
-      <div class="card-column" v-if="vehicles.length">
+      <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
             <i class="pi pi-car"></i> Vehículos Registrados
           </template>
           <template #content>
-            <div
-              class="horizontal-grid"
-              :class="{ 'scrollable-x': vehicles.length > 6 }"
-            >
-              <div
-                v-for="v in vehicles"
-                :key="v.id"
-                class="entry-card grid-entry-card"
-              >
+            <div v-if="loadingVehicles">
+              <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-v-' + n"></div>
+            </div>
+            <div v-else class="horizontal-grid" :class="{ 'scrollable-x': vehicles.length > 6 }">
+              <div v-for="v in vehicles" :key="v.id" class="entry-card grid-entry-card">
                 <div class="entry-content">
                   <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
                 </div>
@@ -121,18 +121,17 @@ export default {
       </div>
     </div>
 
-    <div class="reports-section" v-if="reports.length">
+    <div class="reports-section">
       <pv-card class="businessman-card reports-card">
         <template #title>
           <i class="pi pi-file"></i> Reportes Recientes
         </template>
         <template #content>
-          <div class="reports-carousel">
-            <div
-              v-for="r in reports"
-              :key="r.id"
-              class="entry-card report-entry-card"
-            >
+          <div v-if="loadingReports">
+            <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-r-' + n"></div>
+          </div>
+          <div v-else class="reports-carousel">
+            <div v-for="r in reports" :key="r.id" class="entry-card report-entry-card">
               <div class="entry-content">
                 <p><strong>{{ r.type }}</strong></p>
                 <p>{{ r.description }}</p>
@@ -146,6 +145,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .container-home-businessman {
@@ -365,6 +365,27 @@ export default {
   .report-entry-card {
     min-width: 220px;
     max-width: 90vw;
+  }
+
+
+}
+
+.skeleton-entry {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(90deg, #2c333f 25%, #3d4451 50%, #2c333f 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
 </style>

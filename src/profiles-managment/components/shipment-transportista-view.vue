@@ -12,7 +12,8 @@ export default {
     return {
       shipments: [],
       error: "",
-      userId: Number(localStorage.getItem("userId")) // este es el TRANSPORTISTA
+      loading: true,
+      userId: Number(localStorage.getItem("userId")) // TRANSPORTISTA
     };
   },
   computed: {
@@ -30,6 +31,8 @@ export default {
         this.shipments = Array.isArray(res.data) ? res.data : [];
       } catch {
         this.error = "Error al obtener los envíos.";
+      } finally {
+        this.loading = false;
       }
     },
     goToDetail(id) {
@@ -43,14 +46,21 @@ export default {
 </script>
 
 
+
 <template>
   <div class="container">
     <sidebar-carrier />
     <div class="content">
       <h2 class="title">Envíos Asignados</h2>
-      <div v-if="assignedShipments.length === 0" class="no-shipments">
+
+      <div v-if="loading" class="skeleton-list">
+        <div v-for="n in 4" :key="'skeleton-' + n" class="shipment-skeleton"></div>
+      </div>
+
+      <div v-else-if="assignedShipments.length === 0" class="no-shipments">
         No tienes envíos asignados.
       </div>
+
       <div v-else class="shipments-list">
         <Card v-for="s in assignedShipments" :key="s.id" class="shipment-card">
           <template #title>Destino: {{ s.destiny }}</template>
@@ -69,6 +79,7 @@ export default {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .container {
@@ -103,14 +114,42 @@ export default {
   min-width: 320px;
 }
 
-.btn-space {
-  margin-right: 0.5rem;
-  margin-top: 0.5rem;
-}
-
 .no-shipments {
   color: #ecf0f1;
   text-align: center;
   margin-top: 2rem;
 }
+
+.btn-space {
+  margin-right: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Skeleton loading */
+.skeleton-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.shipment-skeleton {
+  width: calc(50% - 1rem);
+  min-width: 320px;
+  height: 160px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #3a3f47 25%, #505661 50%, #3a3f47 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
 </style>
+

@@ -12,6 +12,9 @@ export default {
       shipments: [],
       vehicles: [],
       reports: [],
+      loadingShipments: true,
+      loadingVehicles: true,
+      loadingReports: true,
       homeApi: new HomeApiService(),
       api: new IamApiService()
     };
@@ -28,11 +31,6 @@ export default {
         this.homeApi.getReports()
       ]);
 
-      console.log("USER ID:", this.id);
-      console.log("Shipments recibidos:", shipmentsRes.data);
-      console.log("Vehicles recibidos:", vehiclesRes.data);
-      console.log("Reports recibidos:", reportsRes.data);
-
       this.shipments = shipmentsRes.data
           .filter(s => Number(s.transporterId) === this.id)
           .slice(0, 5);
@@ -43,11 +41,12 @@ export default {
           .filter(r => Number(r.userId) === this.id)
           .slice(0, 5);
 
-      console.log("Shipments filtrados:", this.shipments);
-      console.log("Vehicles filtrados:", this.vehicles);
-      console.log("Reports filtrados:", this.reports);
     } catch (error) {
       console.error("Error cargando datos del home:", error);
+    } finally {
+      this.loadingShipments = false;
+      this.loadingVehicles = false;
+      this.loadingReports = false;
     }
   },
   methods: {
@@ -74,6 +73,7 @@ const { t } = useI18n();
 </script>
 
 
+
 <template>
   <div class="container-home-businessman">
     <div class="image-title-container mb-4">
@@ -82,13 +82,16 @@ const { t } = useI18n();
     </div>
 
     <div class="card-grid">
-      <div class="card-column" v-if="shipments.length">
+      <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
             <i class="pi pi-truck"></i> {{ t('home.recentShipments') }}
           </template>
           <template #content>
-            <div class="horizontal-grid" :class="{ 'scrollable-x': shipments.length > 6 }">
+            <div v-if="loadingShipments">
+              <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-s-' + n"></div>
+            </div>
+            <div v-else class="horizontal-grid" :class="{ 'scrollable-x': shipments.length > 6 }">
               <div v-for="s in shipments" :key="s.id" class="entry-card grid-entry-card">
                 <div class="entry-content">
                   <p><strong>{{ s.destiny }}</strong> — {{ s.status }}</p>
@@ -103,13 +106,16 @@ const { t } = useI18n();
         </pv-card>
       </div>
 
-      <div class="card-column" v-if="vehicles.length">
+      <div class="card-column">
         <pv-card class="businessman-card">
           <template #title>
             <i class="pi pi-car"></i> {{ t('home.assignedVehicles') }}
           </template>
           <template #content>
-            <div class="horizontal-grid" :class="{ 'scrollable-x': vehicles.length > 6 }">
+            <div v-if="loadingVehicles">
+              <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-v-' + n"></div>
+            </div>
+            <div v-else class="horizontal-grid" :class="{ 'scrollable-x': vehicles.length > 6 }">
               <div v-for="v in vehicles" :key="v.id" class="entry-card grid-entry-card">
                 <div class="entry-content">
                   <p><strong>{{ v.model }}</strong> — {{ v.licensePlate }}</p>
@@ -124,13 +130,16 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div class="reports-section" v-if="reports.length">
+    <div class="reports-section">
       <pv-card class="businessman-card reports-card">
         <template #title>
           <i class="pi pi-file"></i> {{ t('home.recentReports') }}
         </template>
         <template #content>
-          <div class="reports-carousel">
+          <div v-if="loadingReports">
+            <div class="skeleton-entry" v-for="n in 3" :key="'skeleton-r-' + n"></div>
+          </div>
+          <div v-else class="reports-carousel">
             <div v-for="r in reports" :key="r.id" class="entry-card report-entry-card">
               <div class="entry-content">
                 <p><strong>{{ r.type }}</strong></p>
@@ -147,6 +156,7 @@ const { t } = useI18n();
     </div>
   </div>
 </template>
+
 
 
 <style scoped>
@@ -264,5 +274,24 @@ const { t } = useI18n();
 .report-entry-card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.18);
   background: #252d38;
+}
+
+.skeleton-entry {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(90deg, #2c333f 25%, #3d4451 50%, #2c333f 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 </style>
