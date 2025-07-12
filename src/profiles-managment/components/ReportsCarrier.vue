@@ -1,6 +1,8 @@
 <script>
 import { HomeApiService } from "../services/home-api.service.js";
 import SidebarCarrier from "../../public/components/sidebar-carrier.vue";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default {
   name: "CarrierReportsView",
@@ -50,7 +52,7 @@ export default {
       }
     },
     containsForbiddenWords(text) {
-      const forbiddenWords = [/* lista censurada */];
+      const forbiddenWords = [];
       return forbiddenWords.some(word => text.toLowerCase().includes(word));
     },
     async submitReport() {
@@ -77,6 +79,33 @@ export default {
         dateStyle: "short",
         timeStyle: "short"
       });
+    },
+    async downloadReportPDF(report) {
+      const el = document.createElement("div");
+      el.style.padding = "40px";
+      el.style.background = "#ffffff";
+      el.style.width = "600px";
+      el.style.textAlign = "center";
+      el.innerHTML = `
+        <h1 style="font-size: 22pt; margin-bottom: 20px;">Reporte de Incidencia</h1>
+        <h2 style="font-size: 18pt; margin-bottom: 10px;">${this.$t(`reports.types.${report.type}`)}</h2>
+        <p style="font-size: 14pt; margin-bottom: 20px;"><strong>Descripción:</strong><br>${report.description}</p>
+        <p style="font-size: 12pt;"><strong>Fecha:</strong> ${this.formatDate(report.createdAt)}</p>
+      `;
+
+      document.body.appendChild(el);
+      const canvas = await html2canvas(el);
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Reporte_${report.id}.pdf`);
+
+      document.body.removeChild(el);
     }
   }
 };
@@ -145,6 +174,14 @@ export default {
               <template #content>
                 <p>{{ report.description }}</p>
                 <small class="muted">{{ formatDate(report.createdAt) }}</small>
+                <div class="pdf-btn-wrapper">
+                  <pv-button
+                      icon="pi pi-download"
+                      label="Descargar PDF"
+                      class="p-button-sm p-button-secondary"
+                      @click="downloadReportPDF(report)"
+                  />
+                </div>
               </template>
             </pv-card>
           </template>
@@ -158,6 +195,8 @@ export default {
     </div>
   </div>
 </template>
+
+
 
 
 <style scoped>
@@ -218,6 +257,9 @@ label {
   padding: 1rem;
   width: 100%;
   max-width: 360px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .muted {
@@ -225,15 +267,10 @@ label {
   font-size: 0.8rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-    padding: 1rem;
-  }
-  .report-card {
-    max-width: 100%;
-  }
+.pdf-btn-wrapper {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .report-skeleton {
@@ -254,4 +291,16 @@ label {
   }
 }
 
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .report-card {
+    max-width: 100%;
+  }
+}
+
 </style>
+
